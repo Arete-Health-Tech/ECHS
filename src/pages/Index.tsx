@@ -6,12 +6,21 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import hospitalBg from "@/assets/hospital-bg.jpg";
 
+const API_BASE = "http://127.0.0.1:8000";
+
 const Index = () => {
   const navigate = useNavigate();
   const [isRegister, setIsRegister] = useState(false);
-  const [username, setUsername] = useState("");
+
+  // Form states
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [age, setAge] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -24,52 +33,87 @@ const Index = () => {
     }
   }, [navigate, isRegister]);
 
-  const handleLogin = () => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const { username: savedUsername, password: savedPassword } =
-        JSON.parse(storedUser);
-      if (username === savedUsername && password === savedPassword) {
-        localStorage.setItem("isLoggedIn", "true");
-        navigate("/form");
-        return;
+  const handleLogin = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("password", password);
+
+      const res = await fetch(`${API_BASE}/login`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.detail || "Login failed");
       }
-    }
-    if (username === "admin" && password === "admin123") {
+
+      const data = await res.json();
+      localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("isLoggedIn", "true");
       navigate("/form");
-      return;
+    } catch (err: any) {
+      setError(err.message);
     }
-    setError("Invalid credentials. Please try again.");
   };
 
-  const handleRegister = () => {
-    if (!username || !password || !confirmPassword) {
-      setError("Please fill in all fields.");
-      return;
+  const handleRegister = async () => {
+    try {
+      if (
+        !firstName ||
+        !lastName ||
+        !email ||
+        !phone ||
+        !age ||
+        !password ||
+        !confirmPassword
+      ) {
+        setError("Please fill in all fields.");
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError("Passwords do not match.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("first_name", firstName);
+      formData.append("last_name", lastName);
+      formData.append("email", email);
+      formData.append("phone", phone);
+      formData.append("age", age);
+      formData.append("password", password);
+      formData.append("confirm_password", confirmPassword);
+
+      const res = await fetch(`${API_BASE}/register`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.detail || "Registration failed");
+      }
+
+      setIsRegister(false);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
     }
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-    localStorage.setItem("user", JSON.stringify({ username, password }));
-    setIsRegister(false);
-    setError(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
-      if (isRegister) {
-        handleRegister();
-      } else {
-        handleLogin();
-      }
-    }, 600);
+    if (isRegister) {
+      await handleRegister();
+    } else {
+      await handleLogin();
+    }
+    setLoading(false);
   };
 
   return (
@@ -85,9 +129,6 @@ const Index = () => {
       />
 
       <section className="relative z-10 w-full max-w-md p-4">
-        <h1 className="sr-only">
-          {isRegister ? "Hospital Register" : "Hospital Login"}
-        </h1>
         <Card className="shadow-lg rounded-xl bg-card/80 backdrop-blur-xl border border-border animate-enter">
           <CardHeader>
             <CardTitle className="text-2xl font-semibold text-center">
@@ -101,13 +142,56 @@ const Index = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {isRegister && (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {" "}
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone</Label>
+                      <Input
+                        id="phone"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="age">Age</Label>
+                      <Input
+                        id="age"
+                        type="number"
+                        value={age}
+                        onChange={(e) => setAge(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="username"
-                  placeholder="Enter username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  id="email"
+                  placeholder="Enter email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="space-y-2">

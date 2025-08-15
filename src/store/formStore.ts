@@ -51,6 +51,11 @@ export interface Step3 {
   date: string;
   file?: File | null;  // document for step 3
   photo?: File | null; // photo for step 3
+  admission?: string;
+  consultationFor?: string; // Consultation For
+  esmName: string; // ESM Name
+  relationshipWithESM: string; // Relationship with ESM
+  investigation: string; // Investigation
 }
 
 export interface FormDataAll {
@@ -110,7 +115,12 @@ step3: {
   notes: "",
   date: "",
   file: null,
-  photo: null
+  photo: null,
+  admission: "",
+  consultationFor: "",
+  esmName: "",
+  relationshipWithESM: "",
+  investigation: "",
 }
 }
 
