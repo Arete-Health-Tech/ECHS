@@ -136,7 +136,7 @@ const FormWizard = () => {
   };
 
   const onSubmit = () => {
-    if (!validateStep(3)) return;
+    // if (!validateStep(3)) return;
     setSubmitting(true);
     setTimeout(() => {
       setSubmitting(false);
@@ -175,6 +175,7 @@ const FormWizard = () => {
       console.log("Upload successful:", result);
 
       updateStep1({
+        _id: result?.data["_id"] || "",
         serviceId: result?.data["Card No"],
         date: formatDateForInput(result?.data["DOB"]),
         name: result?.data["Patient Name"],
@@ -289,6 +290,7 @@ const FormWizard = () => {
 
       updateStep2({
         aadhaarNumber: result?.data["Aadhaar No"],
+        gender: result?.data["Gender"] || "",
         dob: formatDateForInput(result?.data["Date of Birth"]),
         nameOnCard: result?.data["Name"],
         file: file, // Clear the file field after upload
@@ -537,8 +539,38 @@ const FormWizard = () => {
                                 accept="image/*,application/pdf"
                                 file={data.step1.file || null}
                                 onChange={(f) => updateStep1({ file: f })}
-                                hint="Related ECHS Card (Image)"
+                                hint="Upload ECHS Card (Image/PDF)"
                               />
+
+                              {/* Capture directly from camera */}
+                              <label className="mt-2 block">
+                                <span className="text-sm text-gray-600">
+                                  Or Capture from Camera
+                                </span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  capture="environment" // Opens back camera on mobile
+                                  onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                      updateStep1({ file: e.target.files[0] });
+                                    }
+                                  }}
+                                  className="hidden"
+                                  id="cameraInput"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    document
+                                      .getElementById("cameraInput")
+                                      ?.click()
+                                  }
+                                  className="px-3 py-1 ml-3 mt-1 text-sm rounded-md bg-blue-500 text-white"
+                                >
+                                  Capture Photo
+                                </button>
+                              </label>
                               <Button
                                 onClick={() => {
                                   uploadEChSCard(data.step1.file);
@@ -668,7 +700,37 @@ const FormWizard = () => {
                                   updateStep1Temporary({ file: f })
                                 }
                                 hint="Related Temporary Card (Image)"
-                              />
+                              />{" "}
+                              <label className="mt-2 block">
+                                <span className="text-sm text-gray-600">
+                                  Or Capture from Camera
+                                </span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  capture="environment" // Opens back camera on mobile
+                                  onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                      updateStep1Temporary({
+                                        file: e.target.files[0],
+                                      });
+                                    }
+                                  }}
+                                  className="hidden"
+                                  id="cameraInput"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    document
+                                      .getElementById("cameraInput")
+                                      ?.click()
+                                  }
+                                  className="px-3 py-1 ml-3 mt-1 text-sm rounded-md bg-blue-500 text-white"
+                                >
+                                  Capture Photo
+                                </button>
+                              </label>
                               <Button
                                 onClick={() => {
                                   uploadTemporaryCard(
@@ -890,6 +952,32 @@ const FormWizard = () => {
                             onChange={(f) => updateStep2({ file: f })}
                             hint="Aadhaar card (Image)"
                           />
+                          <label className="mt-2 block">
+                            <span className="text-sm text-gray-600">
+                              Or Capture from Camera
+                            </span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              capture="environment" // Opens back camera on mobile
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  updateStep2({ file: e.target.files[0] });
+                                }
+                              }}
+                              className="hidden"
+                              id="cameraInput"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                document.getElementById("cameraInput")?.click()
+                              }
+                              className="px-3 py-1 ml-3 mt-1 text-sm rounded-md bg-blue-500 text-white"
+                            >
+                              Capture Photo
+                            </button>
+                          </label>
                           <Button
                             onClick={() => {
                               uploadAdharCard(data.step2.file);
@@ -980,6 +1068,22 @@ const FormWizard = () => {
                           </p>
                         )}
                       </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="gender">Gender</Label>
+                        <Input
+                          id="nameOnCard"
+                          value={data.step2.gender}
+                          onChange={(e) =>
+                            updateStep2({ gender: e.target.value })
+                          }
+                          placeholder="Gender"
+                        />
+                        {errors.gender && (
+                          <p className="text-destructive text-sm">
+                            {errors.gender || ""}
+                          </p>
+                        )}
+                      </div>
                     </div>
                     {isloading && (
                       <div className="fixed inset-0 flex items-center justify-center  bg-background/30 backdrop-blur-sm z-50">
@@ -1009,7 +1113,33 @@ const FormWizard = () => {
                             file={data.step3.file || null}
                             onChange={(f) => updateStep3({ file: f })}
                             hint="Final Referral Letter (image)"
-                          />
+                          />{" "}
+                          <label className="mt-2 block">
+                            <span className="text-sm text-gray-600">
+                              Or Capture from Camera
+                            </span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              capture="environment" // Opens back camera on mobile
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  updateStep3({ file: e.target.files[0] });
+                                }
+                              }}
+                              className="hidden"
+                              id="cameraInput"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                document.getElementById("cameraInput")?.click()
+                              }
+                              className="px-3 py-1 ml-3 mt-1 text-sm rounded-md bg-blue-500 text-white"
+                            >
+                              Capture Photo
+                            </button>
+                          </label>
                           <Button
                             onClick={() => {
                               uploadRefferalLetter(data.step3.file);

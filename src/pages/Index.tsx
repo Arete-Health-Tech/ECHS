@@ -51,6 +51,9 @@ const Index = () => {
 
       const data = await res.json();
       localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("user_name", data.user.full_name);
+      localStorage.setItem("user_phone", data.user.phone);
+      localStorage.setItem("user_id", data.user.user_id);
       localStorage.setItem("isLoggedIn", "true");
       navigate("/form");
     } catch (err: any) {

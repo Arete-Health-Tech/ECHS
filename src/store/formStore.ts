@@ -1,7 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export interface Step1 {
+export interface Step1
+{
+  category: any;
+  _id?: string; // Optional ID for the step, if needed
   name: string;              // Patient Name
   department: string;        // ESM Name
   relationship: string;      // Relationship with ESM
@@ -10,7 +13,9 @@ export interface Step1 {
   serviceIdPhoto?: File | null;
   file?: File | null;
 }
-export interface Step1_Temporary {
+export interface Step1_Temporary
+{
+  _id?: string; // Optional ID for the step, if needed
   name: string;              // Patient Name
   esmName: string;        // ESM Name
   relationship: string;      // Relationship with ESM
@@ -23,15 +28,20 @@ export interface Step1_Temporary {
   oicStamp: boolean; // OIC Stamp
 }
 
-export interface Step2 {
+export interface Step2
+{
+  _id?: string; // Optional ID for the step, if needed
   aadhaarNumber: string;     // Aadhaar Number
   nameOnCard: string;        // Name as per Aadhaar
+  gender?: string;
   dob: string;               // Date of Birth
   file?: File | null;        // Aadhaar card scan/photo
   photo?: File | null;       // Passport-size photo
 }
 
-export interface Step3 {
+export interface Step3
+{
+  _id?: string; // Optional ID for the step, if needed
   cardNo: string;
   serviceNo: string;
   patientName: string;
@@ -76,15 +86,18 @@ export interface FormStoreState {
 
 const initialData: FormDataAll = {
   step1: {
+    _id: "",
     name: "",
     department: "",
     relationship: "",
     serviceId: "",
     date: "",
     serviceIdPhoto: null,
-    file: null
+    file: null,
+    category: undefined
   },
   step1Temporary: {
+    _id: "",
     name: "",
     esmName: "",
     relationship: "",
@@ -96,8 +109,9 @@ const initialData: FormDataAll = {
     file: null,
     oicStamp: false
   },
-  step2: { aadhaarNumber: "", nameOnCard: "", dob: "", file: null, photo: null },
-step3: {
+  step2: { _id:"",gender:"",aadhaarNumber: "", nameOnCard: "", dob: "", file: null, photo: null },
+  step3: {
+  _id: "",
   cardNo: "",
   serviceNo: "",
   patientName: "",
