@@ -9,6 +9,7 @@ import FormWizard from "./pages/FormWizard";
 import Result from "./pages/Result";
 import UploadDocument from "./pages/UploadDocument";
 import Dashboard from "./pages/Dashboard";
+import TicketDetail from "./pages/TicketDetail";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
               </RequireAuth>
             }
           />
+          <Route path="/ticket/:id" element={<TicketDetail />} />
           <Route
             path="/result"
             element={
