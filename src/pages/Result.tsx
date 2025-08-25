@@ -2,10 +2,20 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, ChevronDown, ChevronUp, X } from "lucide-react";
+import {
+  Check,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
+  RotateCcw,
+  X,
+  XCircle,
+} from "lucide-react";
 import type { FormDataAll } from "@/store/formStore";
 import Image1 from "@/assets/Cooreecr.png";
 import Image2 from "@/assets/Screenshot 2025-08-12 at 3.18.25 PM.png";
+import Navbar from "@/components/comp/Navbar";
+import { Badge } from "@/components/ui/badge";
 
 interface LocationState {
   data: FormDataAll;
@@ -179,196 +189,200 @@ const Result = () => {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-muted">
-      <div className="border-b sticky top-0 z-50 bg-background ">
-        <header className="container py-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-lg md:text-2xl font-semibold">CGHS</h1>
-            <p className="text-sm text-muted-foreground">
-              Please complete all steps
-            </p>
-          </div>
+      <Navbar />
 
-          <Button
-            onClick={() => {
-              localStorage.removeItem("isLoggedIn");
-              navigate("/");
-            }}
-          >
-            Logout
-          </Button>
-        </header>
+      <div className="container flex flex-row justify-between">
+        <div
+          className="border rounded-sm bg-muted/50 backdrop-blur-md p-4 mb-6 text-center cursor-pointer hover:bg-muted/70 transition-colors"
+          onClick={() => {
+            navigate("/form");
+            setMatched(false);
+            data.step1 = {
+              ...data.step1,
+              name: "",
+              serviceId: "",
+              date: "",
+              serviceIdPhoto: null,
+              file: null,
+              category: undefined,
+            };
+            data.step1Temporary = {
+              _id: "",
+              name: "",
+              esmName: "",
+              relationship: "",
+              serviceId: "",
+              temporaryId: "",
+              category: "",
+              date: "",
+              validUpto: "",
+              file: null,
+              oicStamp: false,
+            };
+            data.step2 = {
+              _id: "",
+              aadhaarNumber: "",
+              nameOnCard: "",
+              dob: "",
+            };
+            data.step3 = {
+              _id: "",
+              cardNo: "",
+              serviceNo: "",
+              patientName: "",
+              category: "",
+              doi: "",
+              noOfSessionsAllowed: "",
+              patientType: "",
+              pdSec: "",
+              contactNo: "",
+              age: "",
+              gender: "",
+              validityUpto: "",
+              referralNo: "",
+              claimId: "",
+              notes: "",
+              date: "",
+              esmName: "",
+              relationshipWithESM: "",
+              investigation: "",
+              file: null,
+            };
+          }}
+        >
+          New Submission
+        </div>
+        <Button
+          // onClick={handleValidateAgain}
+          className="gap-2 bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 transition-opacity"
+          // disabled={isEditing}
+        >
+          <RotateCcw className="h-4 w-4" />
+          Validate Again
+        </Button>
       </div>
 
-      <div
-        className="border-b rounded-sm bg-muted/50 backdrop-blur-md p-4 mb-6 text-center cursor-pointer hover:bg-muted/70 transition-colors"
-        onClick={() => {
-          navigate("/form");
-          setMatched(false);
-          data.step1 = {
-            ...data.step1,
-            name: "",
-            serviceId: "",
-            date: "",
-            serviceIdPhoto: null,
-            file: null,
-            category: undefined,
-          };
-          data.step1Temporary = {
-            _id: "",
-            name: "",
-            esmName: "",
-            relationship: "",
-            serviceId: "",
-            temporaryId: "",
-            category: "",
-            date: "",
-            validUpto: "",
-            file: null,
-            oicStamp: false,
-          };
-          data.step2 = {
-            _id: "",
-            aadhaarNumber: "",
-            nameOnCard: "",
-            dob: "",
-          };
-          data.step3 = {
-            _id: "",
-            cardNo: "",
-            serviceNo: "",
-            patientName: "",
-            category: "",
-            doi: "",
-            noOfSessionsAllowed: "",
-            patientType: "",
-            pdSec: "",
-            contactNo: "",
-            age: "",
-            gender: "",
-            validityUpto: "",
-            referralNo: "",
-            claimId: "",
-            notes: "",
-            date: "",
-            esmName: "",
-            relationshipWithESM: "",
-            investigation: "",
-            file: null,
-          };
-        }}
-      >
-        New Submission
-      </div>
       <section className="container max-w-5xl py-10 ">
         <Card className="shadow-sm rounded-xl bg-card/80 backdrop-blur-md border border-border animate-enter">
-          <CardContent className="space-y-6">
+          <div className="flex items-center justify-center gap-3 p-6">
             {Matched ? (
-              <div className="flex justify-center mt-10  mb-4 text-green-500 text-[24px] md:text-[32px] font-normal">
-                Matched
-              </div>
+              <>
+                <CheckCircle className="h-8 w-8 text-success" />
+                <Badge
+                  variant="secondary"
+                  className="text-lg px-4 py-2 bg-success/10 text-success border-success/20"
+                >
+                  All Documents Matched
+                </Badge>
+              </>
             ) : (
-              <div className="flex justify-center mt-10  mb-4 text-red-500 text-[24px] md:text-[32px] font-normal">
-                Not Matched
-              </div>
+              <>
+                <XCircle className="h-8 w-8 text-destructive" />
+                <Badge
+                  variant="secondary"
+                  className="text-lg px-4 py-2 bg-destructive/10 text-destructive border-destructive/20"
+                >
+                  Documents Don't Match
+                </Badge>
+              </>
             )}
+          </div>
+          {/* Match Table */}
+          {comparisons && (
+            <div className="overflow-x-auto p-4">
+              <table className="w-full border rounded-lg text-sm">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="text-left p-2 border text-[10px] md:text-[14px]">
+                      Field
+                    </th>
+                    <th className="text-left p-2 border text-[10px] md:text-[14px]">
+                      ECHS Card
+                    </th>
+                    <th className="text-left p-2 border text-[10px] md:text-[14px]">
+                      Aadhaar Card
+                    </th>
+                    <th className="text-left p-2 border text-[10px] md:text-[14px]">
+                      Referral Letter
+                    </th>
+                    <th className="text-left p-2 border text-[10px] md:text-[14px]">
+                      Match
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* Name */}
+                  <tr>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      Name
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.step1Name || "-"}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.step2Name || "-"}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.step3Name || "-"}
+                    </td>
+                    <td className="p-2 border  text-[10px] md:text-[14px]">
+                      {comparisons.isNameMatched ? (
+                        <Check className="text-green-600 inline" />
+                      ) : (
+                        <X className="text-red-600 inline" />
+                      )}
+                    </td>
+                  </tr>
 
-            {/* Match Table */}
-            {comparisons && (
-              <div className="overflow-x-auto">
-                <table className="w-full border rounded-lg text-sm">
-                  <thead className="bg-muted">
-                    <tr>
-                      <th className="text-left p-2 border text-[10px] md:text-[14px]">
-                        Field
-                      </th>
-                      <th className="text-left p-2 border text-[10px] md:text-[14px]">
-                        ECHS Card
-                      </th>
-                      <th className="text-left p-2 border text-[10px] md:text-[14px]">
-                        Aadhaar Card
-                      </th>
-                      <th className="text-left p-2 border text-[10px] md:text-[14px]">
-                        Referral Letter
-                      </th>
-                      <th className="text-left p-2 border text-[10px] md:text-[14px]">
-                        Match
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {/* Name */}
-                    <tr>
-                      <td className="p-2 border text-[10px] md:text-[14px]">
-                        Name
-                      </td>
-                      <td className="p-2 border text-[10px] md:text-[14px]">
-                        {comparisons.step1Name || "-"}
-                      </td>
-                      <td className="p-2 border text-[10px] md:text-[14px]">
-                        {comparisons.step2Name || "-"}
-                      </td>
-                      <td className="p-2 border text-[10px] md:text-[14px]">
-                        {comparisons.step3Name || "-"}
-                      </td>
-                      <td className="p-2 border  text-[10px] md:text-[14px]">
-                        {comparisons.isNameMatched ? (
-                          <Check className="text-green-600 inline" />
-                        ) : (
-                          <X className="text-red-600 inline" />
-                        )}
-                      </td>
-                    </tr>
+                  {/* Gender */}
+                  <tr>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      Gender
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.step1Gender || "-"}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.step2Gender || "-"}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.step3Gender || "-"}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.isGenderMatched ? (
+                        <Check className="text-green-600 inline" />
+                      ) : (
+                        <X className="text-red-600 inline" />
+                      )}
+                    </td>
+                  </tr>
 
-                    {/* Gender */}
-                    <tr>
-                      <td className="p-2 border text-[10px] md:text-[14px]">
-                        Gender
-                      </td>
-                      <td className="p-2 border text-[10px] md:text-[14px]">
-                        {comparisons.step1Gender || "-"}
-                      </td>
-                      <td className="p-2 border text-[10px] md:text-[14px]">
-                        {comparisons.step2Gender || "-"}
-                      </td>
-                      <td className="p-2 border text-[10px] md:text-[14px]">
-                        {comparisons.step3Gender || "-"}
-                      </td>
-                      <td className="p-2 border text-[10px] md:text-[14px]">
-                        {comparisons.isGenderMatched ? (
-                          <Check className="text-green-600 inline" />
-                        ) : (
-                          <X className="text-red-600 inline" />
-                        )}
-                      </td>
-                    </tr>
-
-                    {/* Age */}
-                    <tr>
-                      <td className="p-2 border text-[10px] md:text-[14px]">
-                        Age
-                      </td>
-                      <td className="p-2 border text-[10px] md:text-[14px]">
-                        {comparisons.step1Age ?? "-"}
-                      </td>
-                      <td className="p-2 border text-[10px] md:text-[14px]">
-                        {comparisons.step2Age ?? "-"}
-                      </td>
-                      <td className="p-2 border text-[10px] md:text-[14px]">
-                        {comparisons.step3Age ?? "-"}
-                      </td>
-                      <td className="p-2 border text-[10px] md:text-[14px]">
-                        {comparisons.isAgeMatched ? (
-                          <Check className="text-green-600 inline" />
-                        ) : (
-                          <X className="text-red-600 inline" />
-                        )}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </CardContent>
+                  {/* Age */}
+                  <tr>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      Age
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.step1Age ?? "-"}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.step2Age ?? "-"}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.step3Age ?? "-"}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.isAgeMatched ? (
+                        <Check className="text-green-600 inline" />
+                      ) : (
+                        <X className="text-red-600 inline" />
+                      )}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
         </Card>
       </section>
 
