@@ -11,11 +11,12 @@ import {
   X,
   XCircle,
 } from "lucide-react";
-import type { FormDataAll } from "@/store/formStore";
+import { useFormStore, type FormDataAll } from "@/store/formStore";
 import Image1 from "@/assets/Cooreecr.png";
 import Image2 from "@/assets/Screenshot 2025-08-12 at 3.18.25 PM.png";
 import Navbar from "@/components/comp/Navbar";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 interface LocationState {
   data: FormDataAll;
@@ -30,12 +31,17 @@ const Result = () => {
     step2: false,
     step3: false,
   });
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [claimId, setClaimId] = useState<string | null>(null);
+  const { data } =useFormStore();
+const [match,setMatch]= useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState | null;
-
-  const data = state?.data; // ✅ use data from location
+// console.log(state," this is state ");
+  // const data = state?.data; // ✅ use data from location
   const [Matched, setMatched] = useState<boolean>(false);
 
   const toggleSection = (step: keyof FormDataAll) => {
@@ -107,14 +113,15 @@ const Result = () => {
 
     const step2Age = data.step2?.dob ? calculateAge(data.step2.dob) : undefined;
     const step3Age = data.step3?.age ? Number(data.step3.age) : undefined;
-
+console.log(step1Name,step3Name,step2Name," this is step 2 name ");
     const isNameMatched =
       step1Name &&
-      step2Name &&
+      // step2Name &&
       step3Name &&
-      step1Name.trim().toLowerCase() === step2Name.trim().toLowerCase() &&
-      step1Name.trim().toLowerCase() === step3Name.trim().toLowerCase();
-
+      // step1Name.trim().toLowerCase() === step2Name.trim().toLowerCase() &&
+      step1Name.toLowerCase().endsWith(step3Name.toLowerCase())
+      console.log(isNameMatched," this is name matched ");
+      setMatch(isNameMatched);
     const isGenderMatched =
       step1Gender &&
       step2Gender &&
@@ -149,26 +156,91 @@ const Result = () => {
   const submitRequest = async (matched: boolean) => {
     try {
       const token = localStorage.getItem("access_token");
+      let match= Boolean(matched)?Boolean(matched):false;
       const res = await fetch("http://localhost:8000/submit_request", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ matched }),
+        body: JSON.stringify({ match }),
       });
 
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.detail || "Failed to submit request");
       }
-
+console.log(res," this is resfdfdsfdsfdsdgdsgsgdsgsgssgsgsdgdssdgsdg ");
       return await res.json();
     } catch (err) {
       console.error("Error submitting request:", err);
       throw err;
     }
   };
+
+
+
+
+  const handleClaimID = async () => {
+    console.log(data?.step3?.file," this is data step 3 file ");
+    
+    if (data?.step3?.file) {
+      setLoading(true);  // ✅ start loader
+      try {
+        await getClaimID(data.step3.file);
+      } finally {
+        setLoading(false); // ✅ stop loader
+      }
+    } else {
+      setErrors((prev) => ({ ...prev, file1: "File is required" }));
+    }
+  }
+
+
+
+
+  const getClaimID = async (file: File | null) => {
+    if (!file) {
+      setErrors((prev) => ({ ...prev, file1: "File is required" }));
+      return;
+    }
+console.log(file," this is file ");
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const token = localStorage.getItem("access_token");
+
+    setErrors((prev) => ({ ...prev, file1: "" }));
+    try {
+      const response = await fetch(
+        "http://localhost:8000/generate_claim_id",
+        {
+          method: "POST",
+          body: formData,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+      const result = await response.json();
+console.log(result);
+      if (!response.ok) {
+        throw new Error("Failed to get Claim ID");
+      }
+    
+      setErrors((prev) => ({ ...prev, file1: "" }));
+      setClaimId(result.claim_id);
+      // alert(`${"Claim id is"}${result.claim_id}`); 
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      setErrors((prev) => ({
+        ...prev,
+        file1: error.message || "Upload failed",
+      }));
+      toast.error(
+        `Referral Letter Upload failed: ${error.message || "Unknown error"}`
+      );
+    }
+  };
+
 
   useEffect(() => {
     document.title = "Result | ECHS";
@@ -195,6 +267,7 @@ const Result = () => {
         <div
           className="border rounded-sm bg-muted/50 backdrop-blur-md p-4 mb-6 text-center cursor-pointer hover:bg-muted/70 transition-colors"
           onClick={() => {
+            useFormStore.getState().reset();
             navigate("/form");
             setMatched(false);
             data.step1 = {
@@ -252,6 +325,26 @@ const Result = () => {
         >
           New Submission
         </div>
+        <Button
+  onClick={handleClaimID}
+  disabled={loading}
+  className={`gap-2 transition-colors ${
+    loading
+      ? "bg-primary text-white hover:bg-primary/90"
+      : match
+      ? "bg-green-600 text-white border border-green-600 hover:bg-green-700"
+      : "bg-white text-primary border border-primary hover:bg-gray-100"
+  }`}
+>
+  {loading ? (
+    <>
+      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+      Generating...
+    </>
+  ) : (
+    "Generate Claim ID"
+  )}
+</Button>
         <Button
           // onClick={handleValidateAgain}
           className="gap-2 bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 transition-opacity"
@@ -446,6 +539,20 @@ const Result = () => {
           )}
         </Card>
       </section>
+      {claimId && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="bg-white p-6 rounded-2xl shadow-lg w-[90%] max-w-sm text-center animate-enter">
+      <h2 className="text-lg font-semibold text-gray-800">Claim ID Generated</h2>
+      <p className="mt-3 text-xl font-mono text-primary">{claimId}</p>
+      <Button
+        onClick={() => setClaimId(null)}
+        className="mt-6 bg-primary text-white hover:bg-primary/80"
+      >
+        Close
+      </Button>
+    </div>
+  </div>
+)}
     </main>
   );
 };

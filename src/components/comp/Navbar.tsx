@@ -13,13 +13,81 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useFormStore } from "@/store/formStore";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const { data, updateStep1, updateStep2, updateStep3, updateStep1Temporary } =
+  useFormStore();
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
+    localStorage.setItem("isLoggedIn", "false");
+    localStorage.setItem("user_name", "");
+    localStorage.setItem("user_phone", "");
+    localStorage.setItem("user_id", "");
+    updateStep1({
+      _id: "",
+      name: "",
+      department: "",
+      relationship: "",
+      serviceId: "",
+      date: "",
+      serviceIdPhoto: null,
+      file: null,
+      category: undefined,
+    });
+    updateStep1Temporary  ({
+      _id: "",
+      name: "",
+      esmName: "",
+      relationship: "",
+      serviceId: "",
+      temporaryId: "",
+      category: "",
+      date: "",
+      validUpto: "",
+      file: null,
+      oicStamp: false
+    });
+    updateStep2({
+      _id: "",
+      gender: "",
+      aadhaarNumber: "",
+      nameOnCard: "",
+      dob: "",
+      file: null,
+      photo: null,
+    });
+
+    updateStep3({
+      _id: "",
+      cardNo: "",
+      serviceNo: "",
+      patientName: "",
+      category: "",
+      doi: "",
+      noOfSessionsAllowed: "",
+      patientType: "",
+      pdSec: "",
+      contactNo: "",
+      age: "",
+      gender: "",
+      validityUpto: "",
+      referralNo: "",
+      claimId: "",
+      notes: "",
+      date: "",
+      file: null,
+      photo: null,
+      admission: "",
+      consultationFor: "",
+      esmName: "",
+      relationshipWithESM: "",
+      investigation: "",
+    });
+
     navigate("/login");
   };
 

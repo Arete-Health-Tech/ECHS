@@ -200,6 +200,8 @@ const UploadDocument = () => {
   const { data, updateStep1, updateStep2, updateStep3, updateStep1Temporary } =
     useFormStore();
 
+   
+
   useEffect(() => {
     document.title = `Step ${current} | ECHS`;
   }, [current]);
@@ -208,7 +210,7 @@ const UploadDocument = () => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
     if (isLoggedIn !== "true") navigate("/");
   }, [navigate]);
-
+console.log(data," this is final data")
   const progress = useMemo(() => (current / steps.length) * 100, [current]);
 
   const validateStep = (step: number) => {
@@ -271,6 +273,18 @@ const UploadDocument = () => {
 
   const uploadEChSCard = async (file: File | null) => {
     if (!file) {
+      console.log("inside ECHS if condition");
+      updateStep1({
+        _id: "",
+        name: "",
+        department: "",
+        relationship: "",
+        serviceId: "",
+        date: "",
+        serviceIdPhoto: null,
+        file: null,
+        category: undefined,
+      });
       setErrors((prev) => ({ ...prev, file1: "File is required" }));
       return;
     }
@@ -279,7 +293,18 @@ const UploadDocument = () => {
     formData.append("file", file);
 
     const token = localStorage.getItem("access_token");
-
+    updateStep1({
+      _id: "",
+      name: "",
+      department: "",
+      relationship: "",
+      serviceId: "",
+      date: "",
+      serviceIdPhoto: null,
+      file: null,
+      category: undefined,
+    });
+    console.log("outside ECHS file if condition");
     setErrors((prev) => ({ ...prev, file1: "" }));
     try {
       const response = await fetch("http://localhost:8000/extract/echs_card", {
@@ -293,7 +318,7 @@ const UploadDocument = () => {
       }
 
       const result = await response.json();
-      console.log("Upload successful:", result);
+      console.log("Upload successful: ECHS", result);
 
       updateStep1({
         _id: result.ocr_result_id || "",
@@ -322,6 +347,21 @@ const UploadDocument = () => {
 
   const uploadTemporaryCard = async (file: File | null) => {
     if (!file) {
+      updateStep1Temporary  ({
+        _id: "",
+        name: "",
+        esmName: "",
+        relationship: "",
+        serviceId: "",
+        temporaryId: "",
+        category: "",
+        date: "",
+        validUpto: "",
+        file: null,
+        oicStamp: false
+      });
+      console.log("inside temporary file if condition");
+      
       setErrors((prev) => ({ ...prev, file1: "File is required" }));
       return;
     }
@@ -330,6 +370,21 @@ const UploadDocument = () => {
     formData.append("file", file);
 
     const token = localStorage.getItem("access_token");
+
+    updateStep1Temporary  ({
+      _id: "",
+      name: "",
+      esmName: "",
+      relationship: "",
+      serviceId: "",
+      temporaryId: "",
+      category: "",
+      date: "",
+      validUpto: "",
+      file: null,
+      oicStamp: false
+    });
+console.log("outside after empty temporary file if condition");
 
     setErrors((prev) => ({ ...prev, file1: "" }));
     try {
@@ -379,6 +434,16 @@ const UploadDocument = () => {
 
   const uploadAdharCard = async (file: File | null) => {
     if (!file) {
+      console.log("inside file if condition");
+      updateStep2({
+        _id: "",
+        gender: "",
+        aadhaarNumber: "",
+        nameOnCard: "",
+        dob: "",
+        file: null,
+        photo: null,
+      });
       setErrors((prev) => ({ ...prev, file1: "File is required" }));
       return;
     }
@@ -387,6 +452,17 @@ const UploadDocument = () => {
     formData.append("file", file);
 
     const token = localStorage.getItem("access_token");
+
+    updateStep2({
+      _id: "",
+      gender: "",
+      aadhaarNumber: "",
+      nameOnCard: "",
+      dob: "",
+      file: null,
+      photo: null,
+    });
+    console.log("outside after empty file if condition");
 
     setErrors((prev) => ({ ...prev, file1: "" }));
     try {
@@ -404,7 +480,7 @@ const UploadDocument = () => {
       }
 
       const result = await response.json();
-      console.log("Upload successful:", result);
+      console.log("Upload successful: ADHAR", result);
 
       updateStep2({
         _id: result.ocr_result_id || "",
@@ -414,7 +490,6 @@ const UploadDocument = () => {
         nameOnCard: result?.data["Name"],
         file: file, // Clear the file field after upload
       });
-
       setErrors((prev) => ({ ...prev, file1: "" }));
       toast.success("Adhar Card Upload successful!");
     } catch (error: any) {
@@ -428,18 +503,73 @@ const UploadDocument = () => {
       );
     }
   };
+  console.log(data);
 
   const uploadRefferalLetter = async (file: File | null) => {
     if (!file) {
+      updateStep3({
+        _id: "",
+        cardNo: "",
+        serviceNo: "",
+        patientName: "",
+        category: "",
+        doi: "",
+        noOfSessionsAllowed: "",
+        patientType: "",
+        pdSec: "",
+        contactNo: "",
+        age: "",
+        gender: "",
+        validityUpto: "",
+        referralNo: "",
+        claimId: "",
+        notes: "",
+        date: "",
+        file: null,
+        photo: null,
+        admission: "",
+        consultationFor: "",
+        esmName: "",
+        relationshipWithESM: "",
+        investigation: "",
+      });
+      console.log("inside Referral Letter file if condition");
       setErrors((prev) => ({ ...prev, file1: "File is required" }));
       return;
     }
 
     const formData = new FormData();
     formData.append("file", file);
+    // setFileRefferals(file)
 
     const token = localStorage.getItem("access_token");
-
+    updateStep3({
+      _id: "",
+      cardNo: "",
+      serviceNo: "",
+      patientName: "",
+      category: "",
+      doi: "",
+      noOfSessionsAllowed: "",
+      patientType: "",
+      pdSec: "",
+      contactNo: "",
+      age: "",
+      gender: "",
+      validityUpto: "",
+      referralNo: "",
+      claimId: "",
+      notes: "",
+      date: "",
+      file: null,
+      photo: null,
+      admission: "",
+      consultationFor: "",
+      esmName: "",
+      relationshipWithESM: "",
+      investigation: "",
+    });
+    console.log("outside after empty Referral Letter file if condition");
     setErrors((prev) => ({ ...prev, file1: "" }));
     try {
       const response = await fetch(
@@ -456,8 +586,7 @@ const UploadDocument = () => {
       }
 
       const result = await response.json();
-      console.log("Upload successful:", result);
-
+      console.log("Upload successful: REFERRAL", result);
       updateStep3({
         _id: result.ocr_result_id || "",
         cardNo: result?.data?.["Card No"] ?? "",
@@ -499,6 +628,47 @@ const UploadDocument = () => {
     }
   };
 
+  //   const getClaimID = async (file: File | null) => {
+  //     if (!file) {
+  //       setErrors((prev) => ({ ...prev, file1: "File is required" }));
+  //       return;
+  //     }
+
+  //     const formData = new FormData();
+  //     formData.append("file", file);
+
+  //     const token = localStorage.getItem("access_token");
+
+  //     setErrors((prev) => ({ ...prev, file1: "" }));
+  //     try {
+  //       const response = await fetch(
+  //         "http://localhost:8000/generate_claim_id",
+  //         {
+  //           method: "POST",
+  //           body: formData,
+  //           headers: token ? { Authorization: `Bearer ${token}` } : {},
+  //         }
+  //       );
+  //       const result = await response.json();
+  // console.log(result);
+  //       if (!response.ok) {
+  //         throw new Error("Failed to get Claim ID");
+  //       }
+
+  //       setErrors((prev) => ({ ...prev, file1: "" }));
+  //       alert(`${"Claim id is"}${result.claim_id}`);
+  //     } catch (error: any) {
+  //       console.error("Upload error:", error);
+  //       setErrors((prev) => ({
+  //         ...prev,
+  //         file1: error.message || "Upload failed",
+  //       }));
+  //       toast.error(
+  //         `Referral Letter Upload failed: ${error.message || "Unknown error"}`
+  //       );
+  //     }
+  //   };
+
   const formatDateForInput = (dateStr: string) => {
     if (!dateStr) return "";
 
@@ -516,7 +686,7 @@ const UploadDocument = () => {
 
     return "";
   };
-
+console.log(data," this is upload data ")
   const uploadAllDocument = async () => {
     setLoading(true);
     try {
@@ -525,12 +695,19 @@ const UploadDocument = () => {
       } else {
         await uploadTemporaryCard(data.step1Temporary.file);
       }
+
       await uploadAdharCard(data.step2.file);
+
       await uploadRefferalLetter(data.step3.file);
+      // await getClaimID(data.step3.file);
       toast.success("All documents uploaded successfully!");
-      await setLoading(false);
-      setTimeout(() => {
-        navigate("/result", { state: { data, matched: true } });
+      // updateStep1({ file: null });
+      // updateStep1Temporary({ file: null });
+      // updateStep2({ file: null });
+      // updateStep3({ file: null });
+      setTimeout(async () => {
+       setLoading(false);
+        navigate("/result", { state: { matched: true } });
       }, 1000);
     } catch (error) {
       console.error("Error uploading documents:", error);
@@ -538,6 +715,7 @@ const UploadDocument = () => {
       setLoading(false);
     }
   };
+  
 
   return (
     <>
@@ -602,7 +780,7 @@ const UploadDocument = () => {
                 <UploadTile
                   label="Aadhaar Card"
                   accept=".jpg,.jpeg,.png,.pdf"
-                  file={data.step2.file}
+                  file={data?.step2?.file}
                   onChange={(file) => updateStep2({ file })}
                   hint="Upload Aadhaar card scan/photo"
                 />
