@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import hospitalBg from "@/assets/hospital-bg.jpg";
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "https://echs.aretehealth.tech";
 
 const Index = () => {
   const navigate = useNavigate();
