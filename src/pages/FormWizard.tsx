@@ -161,7 +161,7 @@ const FormWizard = () => {
     setLoading(true);
     setErrors((prev) => ({ ...prev, file1: "" }));
     try {
-      const response = await fetch("http://localhost:8000/extract/echs_card", {
+      const response = await fetch("https://echs.aretehealth.tech/extract/echs_card", {
         method: "POST",
         body: formData,
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -215,7 +215,7 @@ const FormWizard = () => {
     setErrors((prev) => ({ ...prev, file1: "" }));
     try {
       const response = await fetch(
-        "http://localhost:8000/extract/temporary_slip",
+        "https://echs.aretehealth.tech/extract/temporary_slip",
         {
           method: "POST",
           body: formData,
@@ -273,7 +273,7 @@ const FormWizard = () => {
     setErrors((prev) => ({ ...prev, file1: "" }));
     try {
       const response = await fetch(
-        "http://localhost:8000/extract/aadhar_card",
+        "https://echs.aretehealth.tech/extract/aadhar_card",
         {
           method: "POST",
           body: formData,
@@ -327,7 +327,7 @@ const FormWizard = () => {
     setErrors((prev) => ({ ...prev, file1: "" }));
     try {
       const response = await fetch(
-        "http://localhost:8000/extract/referral_letter",
+        "https://echs.aretehealth.tech/extract/referral_letter",
         {
           method: "POST",
           body: formData,

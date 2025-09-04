@@ -63,7 +63,7 @@ const TicketDetail = () => {
         const token = localStorage.getItem("access_token");
         const userId = localStorage.getItem("user_id");
         const res = await fetch(
-          `http://localhost:8000/admin/user_history/${userId}`,
+          `https://echs.aretehealth.tech/admin/user_history/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -101,7 +101,7 @@ const TicketDetail = () => {
         const token = localStorage.getItem("access_token");
         const userId = localStorage.getItem("user_id");
         const res = await fetch(
-          `http://localhost:8000/admin/user_history/${userId}`,
+          `https://echs.aretehealth.tech/admin/user_history/${userId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

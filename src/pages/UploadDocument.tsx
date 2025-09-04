@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea";
 import { ImageIcon, FileText, X, Eye } from "lucide-react";
 import { useFormStore } from "@/store/formStore";
@@ -196,11 +197,13 @@ const UploadDocument = () => {
   const [current, setCurrent] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<Object | null>(null);
 
   const { data, updateStep1, updateStep2, updateStep3, updateStep1Temporary } =
     useFormStore();
 
-   
+
 
   useEffect(() => {
     document.title = `Step ${current} | ECHS`;
@@ -210,7 +213,7 @@ const UploadDocument = () => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
     if (isLoggedIn !== "true") navigate("/");
   }, [navigate]);
-console.log(data," this is final data")
+  console.log(data, " this is final data")
   const progress = useMemo(() => (current / steps.length) * 100, [current]);
 
   const validateStep = (step: number) => {
@@ -307,7 +310,7 @@ console.log(data," this is final data")
     console.log("outside ECHS file if condition");
     setErrors((prev) => ({ ...prev, file1: "" }));
     try {
-      const response = await fetch("http://localhost:8000/extract/echs_card", {
+      const response = await fetch("https://echs.aretehealth.tech/extract/echs_card", {
         method: "POST",
         body: formData,
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -347,7 +350,7 @@ console.log(data," this is final data")
 
   const uploadTemporaryCard = async (file: File | null) => {
     if (!file) {
-      updateStep1Temporary  ({
+      updateStep1Temporary({
         _id: "",
         name: "",
         esmName: "",
@@ -361,7 +364,7 @@ console.log(data," this is final data")
         oicStamp: false
       });
       console.log("inside temporary file if condition");
-      
+
       setErrors((prev) => ({ ...prev, file1: "File is required" }));
       return;
     }
@@ -371,7 +374,7 @@ console.log(data," this is final data")
 
     const token = localStorage.getItem("access_token");
 
-    updateStep1Temporary  ({
+    updateStep1Temporary({
       _id: "",
       name: "",
       esmName: "",
@@ -384,12 +387,12 @@ console.log(data," this is final data")
       file: null,
       oicStamp: false
     });
-console.log("outside after empty temporary file if condition");
+    console.log("outside after empty temporary file if condition");
 
     setErrors((prev) => ({ ...prev, file1: "" }));
     try {
       const response = await fetch(
-        "http://localhost:8000/extract/temporary_slip",
+        "https://echs.aretehealth.tech/extract/temporary_slip",
         {
           method: "POST",
           body: formData,
@@ -467,7 +470,7 @@ console.log("outside after empty temporary file if condition");
     setErrors((prev) => ({ ...prev, file1: "" }));
     try {
       const response = await fetch(
-        "http://localhost:8000/extract/aadhar_card",
+        "https://echs.aretehealth.tech/extract/aadhar_card",
         {
           method: "POST",
           body: formData,
@@ -573,7 +576,7 @@ console.log("outside after empty temporary file if condition");
     setErrors((prev) => ({ ...prev, file1: "" }));
     try {
       const response = await fetch(
-        "http://localhost:8000/extract/referral_letter",
+        "https://echs.aretehealth.tech/extract/referral_letter",
         {
           method: "POST",
           body: formData,
@@ -642,7 +645,7 @@ console.log("outside after empty temporary file if condition");
   //     setErrors((prev) => ({ ...prev, file1: "" }));
   //     try {
   //       const response = await fetch(
-  //         "http://localhost:8000/generate_claim_id",
+  //         "https://echs.aretehealth.tech/generate_claim_id",
   //         {
   //           method: "POST",
   //           body: formData,
@@ -686,7 +689,7 @@ console.log("outside after empty temporary file if condition");
 
     return "";
   };
-console.log(data," this is upload data ")
+  console.log(data, " this is upload data ")
   const uploadAllDocument = async () => {
     setLoading(true);
     try {
@@ -706,7 +709,7 @@ console.log(data," this is upload data ")
       // updateStep2({ file: null });
       // updateStep3({ file: null });
       setTimeout(async () => {
-       setLoading(false);
+        setLoading(false);
         navigate("/result", { state: { matched: true } });
       }, 1000);
     } catch (error) {
@@ -715,7 +718,34 @@ console.log(data," this is upload data ")
       setLoading(false);
     }
   };
-  
+
+  const fetchSearchResults = async (query: string) => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const response = await fetch(`https://echs.aretehealth.tech/search/${query}`, {
+        method: "GET",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch search results");
+      }
+
+      const data = await response.json();
+      setSearchResults(data); // ✅ store response in state
+    } catch (error) {
+      console.error("Search API error:", error);
+      setSearchResults([]);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && searchTerm.trim() && searchTerm !== "") {
+      fetchSearchResults(searchTerm);
+    }else{
+      setSearchResults(null);
+    }
+  };
 
   return (
     <>
@@ -750,6 +780,21 @@ console.log(data," this is upload data ")
                 >
                   Temporary Slip
                 </Button>
+                {/* Search Field */}
+                <div className="relative ml-auto w-64">
+                  <Search
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={18}
+                  />
+                  <Input
+                    type="text"
+                    placeholder="Search..."
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={handleKeyDown} // 🔑 listen for Enter key
+                  />
+                </div>
               </div>
 
               {/* Show correct file upload input */}
@@ -829,6 +874,35 @@ console.log(data," this is upload data ")
                 </div>
               </div>
             )}
+          </Card>
+        </section>
+        {/* API Data Section */}
+        <section className="container max-w-4xl px-4 pb-16 space-y-6">
+          <Card className="bg-card shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">
+                Searched Data
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent>
+               {/* Example of showing results */}
+                  {searchResults !== null ? (
+                    <div>
+                          <div>
+                            {`Name Of the Patient : ${searchResults?.['referral_letter']?.['extracted_data']?.["Name of Patient"]}`}
+                          </div>
+                          <div>
+                            {`Claim ID : ${searchResults?.['referral_letter']?.['extracted_data']?.["Claim ID"]}`}
+                          </div>
+                          <div>
+                            {`Referral No : ${searchResults?.['referral_letter']?.['extracted_data']?.["Referral No"]}`}
+                          </div>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No data available.</p>
+                  )}
+            </CardContent>
           </Card>
         </section>
       </main>
