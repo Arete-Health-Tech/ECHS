@@ -36,6 +36,11 @@ const Result = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [claimId, setClaimId] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<string>("");
+  const [approvals, setApprovals] = useState<Record<string, boolean>>({
+    name: false,
+    gender: false,
+    age: false,
+  });
 
   // ✅ include update actions from store
   const {
@@ -117,6 +122,12 @@ const Result = () => {
     }
     return age;
   }
+  const toggleApproval = (field: string) => {
+    setApprovals((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
 
   // Comparisons
   const comparisons = useMemo(() => {
@@ -204,6 +215,7 @@ const Result = () => {
       throw err;
     }
   };
+  const allApproved = Object.values(approvals).every((val) => val === true);
 
   const getClaimID = async (file: File | null) => {
     if (!file) {
@@ -565,12 +577,12 @@ const Result = () => {
         </div>
         <Button
           onClick={handleClaimID}
-          disabled={loading}
+          disabled={loading || !allApproved}
           className={`gap-2 transition-colors ${loading
             ? "bg-primary text-white hover:bg-primary/90"
-            : match
+            : allApproved
               ? "bg-green-600 text-white border border-green-600 hover:bg-green-700"
-              : "bg-white text-primary border border-primary hover:bg-gray-100"
+              : "bg-gray-300 text-gray-600 cursor-not-allowed"
             }`}
         >
           {loading ? (
@@ -582,7 +594,7 @@ const Result = () => {
             "Generate Claim ID"
           )}
         </Button>
-        <Button
+        {/* <Button
           onClick={handleValidateAgain}
           className="gap-2 bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 transition-opacity"
           disabled={loadingAgain}
@@ -598,12 +610,12 @@ const Result = () => {
               Validate Again
             </>
           )}
-        </Button>
+        </Button> */}
       </div>
 
       <section className="container max-w-5xl py-10 ">
         <Card className="shadow-sm rounded-xl bg-card/80 backdrop-blur-md border border-border animate-enter">
-          <div className="flex items-center justify-center gap-3 p-6">
+          {/* <div className="flex items-center justify-center gap-3 p-6">
             {Matched ? (
               <>
                 <CheckCircle className="h-8 w-8 text-success" />
@@ -625,7 +637,7 @@ const Result = () => {
                 </Badge>
               </>
             )}
-          </div>
+          </div> */}
           {/* Match Table */}
           {comparisons && (
             <div className="overflow-x-auto p-4">
@@ -646,6 +658,9 @@ const Result = () => {
                     </th>
                     <th className="text-left p-2 border text-[10px] md:text-[14px]">
                       Match
+                    </th>
+                    <th className="text-left p-2 border text-[10px] md:text-[14px]">
+                      Approval
                     </th>
                   </tr>
                 </thead>
@@ -671,6 +686,14 @@ const Result = () => {
                         <X className="text-red-600 inline" />
                       )}
                     </td>
+                    <td className="p-2 border text-[10px] md:text-[14px] text-center">
+                      <button
+                        onClick={() => toggleApproval("name")}
+                        className="px-2 py-1 border rounded hover:bg-gray-100"
+                      >
+                        {approvals.name ? "✅" : "❌"}
+                      </button>
+                    </td>
                   </tr>
 
                   {/* Gender */}
@@ -694,6 +717,14 @@ const Result = () => {
                         <X className="text-red-600 inline" />
                       )}
                     </td>
+                    <td className="p-2 border text-[10px] md:text-[14px] text-center">
+                      <button
+                        onClick={() => toggleApproval("gender")}
+                        className="px-2 py-1 border rounded hover:bg-gray-100"
+                      >
+                        {approvals.gender ? "✅" : "❌"}
+                      </button>
+                    </td>
                   </tr>
 
                   {/* Age */}
@@ -716,6 +747,14 @@ const Result = () => {
                       ) : (
                         <X className="text-red-600 inline" />
                       )}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px] text-center">
+                      <button
+                        onClick={() => toggleApproval("age")}
+                        className="px-2 py-1 border rounded hover:bg-gray-100"
+                      >
+                        {approvals.age ? "✅" : "❌"}
+                      </button>
                     </td>
                   </tr>
                 </tbody>
@@ -782,6 +821,23 @@ const Result = () => {
             <CardContent>{renderDetails(data.step3, "step3")}</CardContent>
           )}
         </Card>
+        <Button
+          onClick={handleValidateAgain}
+          className="gap-2 bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 transition-opacity"
+          disabled={loadingAgain}
+        >
+          {loadingAgain ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Validating...
+            </>
+          ) : (
+            <>
+              <RotateCcw className="h-4 w-4" />
+              Validate Again
+            </>
+          )}
+        </Button>
 
       </section>
 
@@ -793,7 +849,7 @@ const Result = () => {
             </h2>
             <p className="mt-3 text-xl font-mono text-primary">{claimId}</p>
             <Button
-              onClick={() => setClaimId(null)}
+              onClick={() => { setClaimId(null); reset(); navigate("/form") }}
               className="mt-6 bg-primary text-white hover:bg-primary/80"
             >
               Close
