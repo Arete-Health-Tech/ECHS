@@ -311,7 +311,9 @@ const UploadDocument = () => {
     console.log("outside ECHS file if condition");
     setErrors((prev) => ({ ...prev, file1: "" }));
     try {
+      // const response = await fetch("http://127.0.0.1:8000/extract/echs_card", {
       const response = await fetch("https://echs.aretehealth.tech/extract/echs_card", {
+
         method: "POST",
         body: formData,
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -323,7 +325,7 @@ const UploadDocument = () => {
 
       const result = await response.json();
       console.log("Upload successful: ECHS", result);
-
+console.log(result?.data["DOB"]," this is echs card no ")
       updateStep1({
         _id: result.ocr_result_id || "",
         serviceId: result?.data["Card No"],
@@ -798,23 +800,38 @@ const UploadDocument = () => {
   //     }
   //   };
 
-  const formatDateForInput = (dateStr: string) => {
-    if (!dateStr) return "";
+  // const formatDateForInput = (dateStr: string) => {
+  //   console.log(dateStr, " this is date string");
+  //   if (!dateStr) return "";
 
-    const parsed = new Date(dateStr);
-    if (!isNaN(parsed.getTime())) {
-      return parsed.toISOString().split("T")[0];
-    }
+  //   const parsed = new Date(dateStr);
+  //   console.log(parsed, " this is parsed date");
+  //   if (!isNaN(parsed.getTime())) {
+  //     console.log("this is for yesting purpose ")
+  //     console.log(parsed.toISOString().split("T")[0], " this is parsed date");
+  //     return parsed.toISOString().split("T")[0];
+  //   }
 
-    const delimiter = dateStr.includes("/") ? "/" : "-";
-    const [day, month, year] = dateStr.split(delimiter);
+  //   const delimiter = dateStr.includes("/") ? "/" : "-";
+  //   const [day, month, year] = dateStr.split(delimiter);
+  //   console.log(day, month, year, " split date parts"); 
 
-    if (day && month && year) {
-      return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-    }
+  //   if (day && month && year) {
+  //     return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  //   }
 
-    return "";
+  //   return "";
+  // };
+  const formatDateForInput = (dateStr) => {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    console.log(year,month,day, " this is date string");
+    return `${year}-${month}-${day}`;
   };
+  
+  
   console.log(data, " this is upload data ")
   const uploadAllDocument = async () => {
     setLoading(true);

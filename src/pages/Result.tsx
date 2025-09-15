@@ -328,15 +328,17 @@ const step4Surgery=  surgeryName || "";
 
   // helper function to format date
   const formatDate = (isoDate: string) => {
+    console.log(isoDate," tjis is isodat")
     if (!isoDate) return "";
     const date = new Date(isoDate);
+    console.log(date,"date format")
     return date.toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     });
   };
-
+// console.log(data.step1.date,"this is date")
   const formatDateForInput = (dateStr: string) => {
     if (!dateStr) return "";
 
