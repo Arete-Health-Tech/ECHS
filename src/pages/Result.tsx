@@ -88,7 +88,7 @@ const Result = () => {
           className="flex flex-col md:flex-row md:items-center justify-between border-b py-3 gap-2 text-sm"
         >
           <label className="font-medium capitalize text-xs md:text-sm md:w-1/3">
-          {key === "date" ? "DOB" : key === "serviceId" ? "Card Number" : key === "serviceIdPhoto"?"serviceId":key}:
+          {key === "date" ? "DOB" : key === "serviceId" ? "Card Number" : key === "serviceIdPhoto"?"serviceId":key === "department" ? "Service No":key}:
           </label>
         
           <input
