@@ -64,12 +64,39 @@ export interface Step3 {
   relationshipWithESM: string;
   investigation: string;
 }
+export interface Step4 {
+  _id?: string;
+  cardNo: string;
+  serviceNo: string;
+  patientName: string;
+  category: string;
+  doi: string;
+  noOfSessionsAllowed: string;
+  patientType: string;
+  pdSec: string;
+  contactNo: string;
+  age: string;
+  gender: string;
+  validityUpto: string;
+  referralNo: string;
+  claimId: string;
+  notes: string;
+  date: string;
+  file?: File | null;
+  photo?: File | null;
+  admission?: string;
+  consultationFor?: string;
+  esmName: string;
+  relationshipWithESM: string;
+  investigation: string;
+}
 
 export interface FormDataAll {
   step1: Step1;
   step1Temporary: Step1_Temporary;
   step2: Step2;
   step3: Step3;
+  step4: Step4;
 }
 
 export interface FormStoreState {
@@ -78,6 +105,7 @@ export interface FormStoreState {
   updateStep1Temporary: (patch: Partial<Step1_Temporary>) => void;
   updateStep2: (patch: Partial<Step2>) => void;
   updateStep3: (patch: Partial<Step3>) => void;
+  updateStep4: (patch: Partial<Step4>) => void;
   reset: () => void;
 }
 
@@ -142,6 +170,32 @@ const initialData: FormDataAll = {
     relationshipWithESM: "",
     investigation: "",
   },
+  step4: {
+    _id: "",
+    cardNo: "",
+    serviceNo: "",
+    patientName: "",
+    category: "",
+    doi: "",
+    noOfSessionsAllowed: "",
+    patientType: "",
+    pdSec: "",
+    contactNo: "",
+    age: "",
+    gender: "",
+    validityUpto: "",
+    referralNo: "",
+    claimId: "",
+    notes: "",
+    date: "",
+    file: null,
+    photo: null,
+    admission: "",
+    consultationFor: "",
+    esmName: "",
+    relationshipWithESM: "",
+    investigation: "",
+  },
 };
 
 // ------------------- Store -------------------
@@ -170,6 +224,11 @@ export const useFormStore = create<FormStoreState>()(
           data: { ...s.data, step3: { ...s.data.step3, ...patch } },
         })),
 
+        updateStep4: (patch) =>
+          set((s) => ({
+            data: { ...s.data, step4: { ...s.data.step4, ...patch } },
+          })),
+
       reset: () => set({ data: structuredClone(initialData) }),
     }),
     {
@@ -182,6 +241,7 @@ export const useFormStore = create<FormStoreState>()(
           step1Temporary: { ...state.data.step1Temporary, file: null, oicStamp: false },
           step2: { ...state.data.step2, file: null, photo: null },
           step3: { ...state.data.step3, file: null, photo: null },
+          step4: { ...state.data.step4, file: null, photo: null },
         },
       }),
       storage: {

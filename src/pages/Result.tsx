@@ -40,6 +40,7 @@ const Result = () => {
     name: false,
     gender: false,
     age: false,
+    surgery: false,
   });
 
   // ✅ include update actions from store
@@ -87,9 +88,9 @@ const Result = () => {
           className="flex flex-col md:flex-row md:items-center justify-between border-b py-3 gap-2 text-sm"
         >
           <label className="font-medium capitalize text-xs md:text-sm md:w-1/3">
-            {key}:
+          {key === "date" ? "DOB" : key === "serviceId" ? "Card Number" : key === "serviceIdPhoto"?"serviceId":key}:
           </label>
-
+        
           <input
             type={
               key.toLowerCase().includes("date") || key === "dob"
@@ -100,6 +101,7 @@ const Result = () => {
             onChange={(e) => updateField(key, e.target.value)}
             className="flex-1 border rounded-md px-2 py-1 text-xs md:text-sm focus:ring-2 focus:ring-primary focus:outline-none"
           />
+          
         </div>
       );
     });
@@ -129,18 +131,35 @@ const Result = () => {
     }));
   };
 
+  // const surgeryName = "Hernia"
+  const surgeryName = "Hernia"
+//Name for prescription 
+const prescriptionName =  "Testing";
+const prescriptionAge =  "45";
+const prescriptionGender = "Male";
   // Comparisons
   const comparisons = useMemo(() => {
     if (!data) return null;
+const surgeryName = "cystoscopy with TURBT with OIU- as adv by tt spl"
+//Name for prescription 
+const prescriptionName =  "Testing";
+const prescriptionAge =  "45";
+const prescriptionGender = "Male";
 
     const step1Name = data.step1?.name || data.step1Temporary?.name;
     const step2Name = data.step2?.nameOnCard;
     const step3Name = data.step3?.patientName;
+  const step4Name = prescriptionName || "";
+   
+    // const step4Surgery = data.step4?.surgeryName;
+
 
     const step1Gender =
       data.step1?.category || data.step1Temporary?.category || "";
     const step2Gender = data.step2?.gender || "";
     const step3Gender = data.step3?.gender || "";
+    const step4Gender = prescriptionGender || "";
+    
 
     const step1Age = data.step1?.date
       ? calculateAge(data.step1.date)
@@ -150,6 +169,14 @@ const Result = () => {
 
     const step2Age = data.step2?.dob ? calculateAge(data.step2.dob) : undefined;
     const step3Age = data.step3?.age ? Number(data.step3.age) : undefined;
+    const step4Age = prescriptionAge || "";
+
+const step1Surgery=  "";
+const step2Surgery=  "";
+const step3Surgery=  data.step3?.notes || "";     
+const step4Surgery=  surgeryName || "";
+    
+    // const step1.validity = data.step1.?.validUpto || "";
 
     const isNameMatched =
       step1Name &&
@@ -166,12 +193,14 @@ const Result = () => {
       step1Gender.trim().toLowerCase() === step2Gender.trim().toLowerCase() &&
       step1Gender.trim().toLowerCase() === step3Gender.trim().toLowerCase();
 
-    const isAgeMatched =
+      const isAgeMatched =
       step1Age !== undefined &&
-      step2Age !== undefined &&
+      // step2Age !== undefined &&
       step3Age !== undefined &&
-      Number(step1Age) === Number(step2Age) &&
-      Number(step1Age) === Number(step3Age);
+      // Math.floor(Number(step1Age)) === Math.floor(Number(step2Age)) &&
+      Math.floor(Number(step1Age)) === Math.floor(Number(step3Age));
+
+      const isSurgeryMatched =  step3Surgery && step4Surgery && step3Surgery.trim().toLowerCase() === step4Surgery.trim().toLowerCase();
 
     return {
       step1Name,
@@ -186,7 +215,12 @@ const Result = () => {
       isNameMatched,
       isGenderMatched,
       isAgeMatched,
-      allMatched: isNameMatched && isGenderMatched && isAgeMatched,
+      step1Surgery,
+      step2Surgery,
+      step3Surgery,
+      step4Surgery,
+      isSurgeryMatched,
+      allMatched: isNameMatched && isGenderMatched && isAgeMatched && isSurgeryMatched,
     };
   }, [data]);
 
@@ -216,6 +250,7 @@ const Result = () => {
     }
   };
   const allApproved = Object.values(approvals).every((val) => val === true);
+  // console.log(allApproved,"thjis is call ");
 
   const getClaimID = async (file: File | null) => {
     if (!file) {
@@ -254,10 +289,13 @@ const Result = () => {
 
 
   const handleClaimID = async () => {
+    console.log("this is not ")
+    console.log(data?.step3?.file,"this is call  zsasasasasa")
     if (data?.step3?.file) {
       setLoading(true);
+      console.log(data?.step3?.file,"this is call  zsasasasasa")
       try {
-        console.log(data.step3.file);
+        console.log(data.step3.file," thi is 2");
         await getClaimID(data.step3.file);
       } finally {
         setLoading(false);
@@ -401,7 +439,7 @@ const Result = () => {
       const payload: Record<string, any> = {};
       payload.echs_card = transformStep1(data.step1);
       payload.temporary_slip = transformStep1Temporary(data.step1Temporary);
-      payload.aadhar_card = transformStep2(data.step2);
+      payload.aadhar_card = transformStep2(data.step2)
       payload.referral_letter = transformStep3(data.step3);
       const res = await fetch(`https://echs.aretehealth.tech/request_update/${requestId}`, {
         method: "PUT",
@@ -657,6 +695,9 @@ const Result = () => {
                       Referral Letter
                     </th>
                     <th className="text-left p-2 border text-[10px] md:text-[14px]">
+                      Prescription
+                    </th>
+                    <th className="text-left p-2 border text-[10px] md:text-[14px]">
                       Match
                     </th>
                     <th className="text-left p-2 border text-[10px] md:text-[14px]">
@@ -675,6 +716,9 @@ const Result = () => {
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
                       {comparisons.step2Name || "-"}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.step3Name || "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
                       {comparisons.step3Name || "-"}
@@ -711,6 +755,9 @@ const Result = () => {
                       {comparisons.step3Gender || "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.step3Gender || "-"}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
                       {comparisons.isGenderMatched ? (
                         <Check className="text-green-600 inline" />
                       ) : (
@@ -742,6 +789,9 @@ const Result = () => {
                       {comparisons.step3Age ?? "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.step3Age ?? "-"}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
                       {comparisons.isAgeMatched ? (
                         <Check className="text-green-600 inline" />
                       ) : (
@@ -757,13 +807,51 @@ const Result = () => {
                       </button>
                     </td>
                   </tr>
+                  <tr>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      Surgery Name
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      { "-"}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {"-"}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.step3Surgery?? "-"}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.step4Surgery ?? "-"}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px]">
+                      {comparisons.isSurgeryMatched ? (
+                        <Check className="text-green-600 inline" />
+                      ) : (
+                        <X className="text-red-600 inline" />
+                      )}
+                    </td>
+                    <td className="p-2 border text-[10px] md:text-[14px] text-center">
+                      <button
+                        onClick={() => toggleApproval("surgery")}
+                        className="px-2 py-1 border rounded hover:bg-gray-100"
+                      >
+                        {approvals.surgery ? "✅" : "❌"}
+                      </button>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
           )}
         </Card>
+        <div
+          className="border border-primary rounded-sm bg-muted/50 backdrop-blur-md p-4 mb-6 text-center cursor-pointer hover:bg-muted/70 transition-colors"
+        >
+          Validity Upto : {data.step3?.validityUpto || "N/A"}
+        </div>
       </section>
-
+      
+     
       {/* Step Sections */}
       <section className="container max-w-5xl pb-20 space-y-6">
         <Card className={isEmptyObject(data.step1) ? "opacity-50 pointer-events-none" : ""}>

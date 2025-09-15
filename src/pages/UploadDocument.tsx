@@ -15,6 +15,7 @@ const steps = [
   { id: 1, label: "ECHS Card / Temporay Slip" },
   { id: 2, label: "Adhar Card" },
   { id: 3, label: "Referral Letter" },
+  { id: 4, label: "Prescription" },
 ];
 
 // Modal Component for Image Preview
@@ -200,7 +201,7 @@ const UploadDocument = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Object | null>(null);
 
-  const { data, updateStep1, updateStep2, updateStep3, updateStep1Temporary } =
+  const { data, updateStep1, updateStep2, updateStep3,updateStep4,updateStep1Temporary } =
     useFormStore();
 
 
@@ -596,14 +597,14 @@ const UploadDocument = () => {
         serviceNo: result?.data?.["Service No"] ?? "",
         patientName: result?.data?.["Name of Patient"] ?? "",
         category: result?.data?.["Category"] ?? "",
-        doi: formatDateForInput(result?.data?.["Date of Issue"] ?? ""),
+        doi:result?.data?.["Date of Issue"] ?? "",
         noOfSessionsAllowed: result?.data?.["No of Sessions Allowed"] ?? "",
         patientType: result?.data?.["Patient Type"] ?? "",
         pdSec: result?.data?.["Polyclinic Remarks"] ?? "",
         contactNo: result?.data?.["ESM Contact Number"] ?? "",
         age: result?.data?.["Age"] ?? "",
         gender: result?.data?.["Gender"] ?? "",
-        validityUpto: formatDateForInput(result?.data?.["Valid Upto"] ?? ""),
+        validityUpto:result?.data?.["Valid Upto"] ?? "",
         referralNo: result?.data?.["Referral No"] ?? "",
         claimId: result?.data?.["Claim ID"] ?? "Not Found",
         notes: result?.data?.["Clinical Notes"] ?? "",
@@ -630,6 +631,131 @@ const UploadDocument = () => {
       );
     }
   };
+
+  const uploadPrescription = async (file: File | null) => {
+    if (!file) {
+      updateStep4({
+        _id: "",
+        cardNo: "",
+        serviceNo: "",
+        patientName: "",
+        category: "",
+        doi: "",
+        noOfSessionsAllowed: "",
+        patientType: "",
+        pdSec: "",
+        contactNo: "",
+        age: "",
+        gender: "",
+        validityUpto: "",
+        referralNo: "",
+        claimId: "",
+        notes: "",
+        date: "",
+        file: null,
+        photo: null,
+        admission: "",
+        consultationFor: "",
+        esmName: "",
+        relationshipWithESM: "",
+        investigation: "",
+      });
+      console.log("inside Prescription file if condition");
+      setErrors((prev) => ({ ...prev, file1: "File is required" }));
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    // setFileRefferals(file)
+
+    const token = localStorage.getItem("access_token");
+    updateStep4({
+      _id: "",
+      cardNo: "",
+      serviceNo: "",
+      patientName: "",
+      category: "",
+      doi: "",
+      noOfSessionsAllowed: "",
+      patientType: "",
+      pdSec: "",
+      contactNo: "",
+      age: "",
+      gender: "",
+      validityUpto: "",
+      referralNo: "",
+      claimId: "",
+      notes: "",
+      date: "",
+      file: null,
+      photo: null,
+      admission: "",
+      consultationFor: "",
+      esmName: "",
+      relationshipWithESM: "",
+      investigation: "",
+    });
+    console.log("outside after empty Referral Letter file if condition");
+    setErrors((prev) => ({ ...prev, file1: "" }));
+    try {
+      const response = await fetch(
+        "https://echs.aretehealth.tech/extract/prescription",
+        {
+          method: "POST",
+          body: formData,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to upload Referral Letter");
+      }
+
+      const result = await response.json();
+      console.log("Upload successful: REFERRAL", result);
+      updateStep4({
+        _id: result.ocr_result_id || "",
+        cardNo: result?.data?.["Card No"] ?? "",
+        serviceNo: result?.data?.["Service No"] ?? "",
+        patientName: result?.data?.["Name of Patient"] ?? "",
+        category: result?.data?.["Category"] ?? "",
+        doi: result?.data?.["Date of Issue"] ?? "",
+        noOfSessionsAllowed: result?.data?.["No of Sessions Allowed"] ?? "",
+        patientType: result?.data?.["Patient Type"] ?? "",
+        pdSec: result?.data?.["Polyclinic Remarks"] ?? "",
+        contactNo: result?.data?.["ESM Contact Number"] ?? "",
+        age: result?.data?.["Age"] ?? "",
+        gender: result?.data?.["Gender"] ?? "",
+        validityUpto:result?.data?.["Valid Upto"] ?? "",
+        referralNo: result?.data?.["Referral No"] ?? "",
+        claimId: result?.data?.["Claim ID"] ?? "Not Found",
+        notes: result?.data?.["Clinical Notes"] ?? "",
+        admission: result?.data?.["Admission"] ?? "",
+        consultationFor: result?.data?.["Consultation For"] ?? "",
+        esmName: result?.data?.["ESM Name"] ?? "",
+        relationshipWithESM: result?.data?.["Relationship with ESM"] ?? "",
+        investigation: result?.data?.["Investigation"] ?? "",
+
+        // date: "",
+        file: file,
+      });
+
+      setErrors((prev) => ({ ...prev, file1: "" }));
+      toast.success("Prescription Upload successful!");
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      setErrors((prev) => ({
+        ...prev,
+        file1: error.message || "Upload failed",
+      }));
+      toast.error(
+        `Prescription Upload failed: ${error.message || "Unknown error"}`
+      );
+    }
+  };
+
+  
 
   //   const getClaimID = async (file: File | null) => {
   //     if (!file) {
@@ -702,6 +828,8 @@ const UploadDocument = () => {
       await uploadAdharCard(data.step2.file);
 
       await uploadRefferalLetter(data.step3.file);
+
+      await uploadPrescription(data.step4.file);
       // await getClaimID(data.step3.file);
       toast.success("All documents uploaded successfully!");
       // updateStep1({ file: null });
@@ -841,7 +969,16 @@ const UploadDocument = () => {
                   hint="Upload referral letter document"
                 />
               </div>
-
+              {/*Step 4 - Prescription Details */}
+ <div className="grid grid-cols-1 gap-4">
+                <UploadTile
+                  label="Prescription"
+                  accept=".jpg,.jpeg,.png,.pdf"
+                  file={data.step4.file}
+                  onChange={(file) => updateStep4({ file })}
+                  hint="Upload prescription"
+                />
+              </div>
               {/* Errors */}
               {Object.keys(errors).length > 0 && (
                 <div className="text-destructive text-sm">
