@@ -88,12 +88,12 @@ const Result = () => {
           className="flex flex-col md:flex-row md:items-center justify-between border-b py-3 gap-2 text-sm"
         >
           <label className="font-medium capitalize text-xs md:text-sm md:w-1/3">
-          {key === "date" ? "DOB" : key === "serviceId" ? "Card Number" : key === "serviceIdPhoto"?"serviceId":key === "department" ? "Service No":key}:
+          {key === "date" ? "date":key}:
           </label>
         
           <input
             type={
-              key.toLowerCase().includes("date") || key === "dob"
+              key.toLowerCase().includes("date") || key === "dob" || key === "dom"
                 ? "date"
                 : "text"
             }
@@ -161,8 +161,8 @@ const prescriptionGender = "Male";
     const step4Gender = prescriptionGender || "";
     
 
-    const step1Age = data.step1?.date
-      ? calculateAge(data.step1.date)
+    const step1Age = data.step1?.dob
+      ? calculateAge(data.step1.dob)
       : data.step1Temporary?.date
         ? calculateAge(data.step1Temporary.date)
         : undefined;
@@ -339,37 +339,49 @@ const step4Surgery=  surgeryName || "";
     });
   };
 // console.log(data.step1.date,"this is date")
-  const formatDateForInput = (dateStr: string) => {
-    if (!dateStr) return "";
+  // const formatDateForInput = (dateStr: string) => {
+  //   if (!dateStr) return "";
 
-    const parsed = new Date(dateStr);
-    if (!isNaN(parsed.getTime())) {
-      return parsed.toISOString().split("T")[0];
-    }
+  //   const parsed = new Date(dateStr);
+  //   if (!isNaN(parsed.getTime())) {
+  //     return parsed.toISOString().split("T")[0];
+  //   }
 
-    const delimiter = dateStr.includes("/") ? "/" : "-";
-    const [day, month, year] = dateStr.split(delimiter);
+  //   const delimiter = dateStr.includes("/") ? "/" : "-";
+  //   const [day, month, year] = dateStr.split(delimiter);
 
-    if (day && month && year) {
-      return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-    }
+  //   if (day && month && year) {
+  //     return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  //   }
 
-    return "";
+  //   return "";
+  // };
+  const formatDateForInput = (dateStr) => {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    console.log(year,month,day, " this is date string");
+    return `${year}-${month}-${day}`;
   };
 
   const transformStep1 = (step1: {
     name: string;
-    department: string;
+    esm: string;
+dom: string;
+cardNo: string;
     relationship: string;
-    serviceId: string;
-    date: string;
+    serviceNo: string;
+    dob: string;
   }) => {
     return {
-      "Card No": step1.serviceId,
+      "Card No": step1.cardNo,
       "Patient Name": step1.name,
-      "ESM": step1.department,
-      "DOB": formatDate(step1.date),
+      "ESM": step1.esm,
+      "DOB": formatDateForInput(step1.dob),
       "Relationship with ESM": step1.relationship,
+      "Service No": step1.serviceNo,
+      "DOM": formatDateForInput(step1.dom),
     };
   };
 
@@ -480,11 +492,13 @@ const step4Surgery=  surgeryName || "";
       // ⚡️ Update Zustand store with new values from response
       if (result.step1) updateStep1({
         _id: result.ocr_result_id || "",
-        serviceId: result?.data["Card No"],
-        date: formatDateForInput(result?.data["DOB"]),
+        cardNo: result?.data["Card No"],
+        dob: formatDateForInput(result?.data["DOB"]),
         name: result?.data["Patient Name"],
-        department: result?.data["ESM"],
+        esm: result?.data["ESM"],
         relationship: result?.data["Relationship with ESM"],
+        dom: formatDateForInput(result?.data["DOM"]),
+        serviceNo: result?.data["Service No"],
         // serviceIdPhoto: file, // Assuming the uploaded file is the service ID photo
         file: echs_card_file, // Clear the file field after upload
       });
@@ -563,9 +577,12 @@ const step4Surgery=  surgeryName || "";
             data.step1 = {
               ...data.step1,
               name: "",
-              serviceId: "",
-              date: "",
-              serviceIdPhoto: null,
+              cardNo: "",
+              dob: "",
+              esm: "",
+              relationship: "",
+              serviceNo: "",
+              dom: "",
               file: null,
               category: undefined,
             };

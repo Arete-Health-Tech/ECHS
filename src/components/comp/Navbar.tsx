@@ -30,13 +30,13 @@ const Navbar: React.FC = () => {
     updateStep1({
       _id: "",
       name: "",
-      department: "",
-      relationship: "",
-      serviceId: "",
-      date: "",
-      serviceIdPhoto: null,
-      file: null,
-      category: undefined,
+        cardNo: "",
+        esm: "",
+        relationship: "",
+        serviceNo: "",
+        dob: "",
+        dom:"",
+        file: null,
     });
     updateStep1Temporary  ({
       _id: "",

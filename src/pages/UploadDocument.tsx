@@ -221,9 +221,9 @@ const UploadDocument = () => {
     const newErrors: Record<string, string> = {};
     if (step === 1) {
       if (!data.step1.name) newErrors.name = "Name is required";
-      if (!data.step1.department) newErrors.department = "ESM Name is required";
-      if (!data.step1.serviceId) newErrors.serviceId = "Service ID is required";
-      if (!data.step1.date) newErrors.date1 = "DOB is required";
+      if (!data.step1.esm) newErrors.department = "ESM Name is required";
+      if (!data.step1.serviceNo) newErrors.serviceId = "Service ID is required";
+      if (!data.step1.dob) newErrors.date1 = "DOB is required";
       if (!data.step1.relationship)
         newErrors.relationship = "Relationship with ESM is required";
     }
@@ -281,13 +281,13 @@ const UploadDocument = () => {
       updateStep1({
         _id: "",
         name: "",
-        department: "",
+        cardNo: "",
+        esm: "",
         relationship: "",
-        serviceId: "",
-        date: "",
-        serviceIdPhoto: null,
+        serviceNo: "",
+        dob: "",
+        dom:"",
         file: null,
-        category: undefined,
       });
       setErrors((prev) => ({ ...prev, file1: "File is required" }));
       return;
@@ -299,14 +299,14 @@ const UploadDocument = () => {
     const token = localStorage.getItem("access_token");
     updateStep1({
       _id: "",
-      name: "",
-      department: "",
-      relationship: "",
-      serviceId: "",
-      date: "",
-      serviceIdPhoto: null,
-      file: null,
-      category: undefined,
+        name: "",
+        cardNo: "",
+        esm: "",
+        relationship: "",
+        serviceNo: "",
+        dob: "",
+        dom:"",
+        file: null,
     });
     console.log("outside ECHS file if condition");
     setErrors((prev) => ({ ...prev, file1: "" }));
@@ -328,11 +328,13 @@ const UploadDocument = () => {
 console.log(result?.data["DOB"]," this is echs card no ")
       updateStep1({
         _id: result.ocr_result_id || "",
-        serviceId: result?.data["Card No"],
-        date: formatDateForInput(result?.data["DOB"]),
+        cardNo: result?.data["Card No"],
+        dob: formatDateForInput(result?.data["DOB"]),
         name: result?.data["Patient Name"],
-        department: result?.data["ESM"],
+        esm: result?.data["ESM"],
+        dom:formatDateForInput(result?.data["DOM"]),
         relationship: result?.data["Relationship with ESM"],
+        serviceNo: result?.data["Service No"],
         // serviceIdPhoto: file, // Assuming the uploaded file is the service ID photo
         file: file, // Clear the file field after upload
       });

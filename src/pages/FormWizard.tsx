@@ -88,9 +88,9 @@ const FormWizard = () => {
     if (step === 1) {
       // if (!data.step1.file) newErrors.file1 = "Document is required";
       if (!data.step1.name) newErrors.name = "Name is required";
-      if (!data.step1.department) newErrors.department = "ESM Name is required";
-      if (!data.step1.serviceId) newErrors.serviceId = "Service ID is required";
-      if (!data.step1.date) newErrors.date1 = "DOB is required";
+      if (!data.step1.esm) newErrors.department = "ESM Name is required";
+      if (!data.step1.serviceNo) newErrors.serviceId = "Service ID is required";
+      if (!data.step1.dob) newErrors.date1 = "DOB is required";
       if (!data.step1.relationship)
         newErrors.relationship = "Relationship with ESM is required";
     }
@@ -176,11 +176,13 @@ const FormWizard = () => {
 
       updateStep1({
         _id: result?.data["_id"] || "",
-        serviceId: result?.data["Card No"],
-        date: formatDateForInput(result?.data["DOB"]),
+        cardNo: result?.data["Card No"],
+        dob: formatDateForInput(result?.data["DOB"]),
         name: result?.data["Patient Name"],
-        department: result?.data["ESM"],
+        esm: result?.data["ESM"],
+        dom:result?.data["DOM"] || "",
         relationship: result?.data["Relationship with ESM"],
+        serviceNo: result?.data["Service No"] || "",
         // serviceIdPhoto: file, // Assuming the uploaded file is the service ID photo
         file: file, // Clear the file field after upload
       });
@@ -591,12 +593,12 @@ const FormWizard = () => {
                                 </p>
                               )}
                             </div>
-                            <div className="mt-3 flex gap-3">
+                            {/* <div className="mt-3 flex gap-3">
                               {renderFilePreview(
                                 data.step1.serviceIdPhoto || null
                               )}
                               {renderFilePreview(data.step1.file || null)}
-                            </div>
+                            </div> */}
                           </div>
 
                           {/* Fields */}
@@ -605,9 +607,9 @@ const FormWizard = () => {
                               <Label htmlFor="serviceId">Card No.</Label>
                               <Input
                                 id="serviceId"
-                                value={data.step1.serviceId}
+                                value={data.step1.cardNo}
                                 onChange={(e) =>
-                                  updateStep1({ serviceId: e.target.value })
+                                  updateStep1({ cardNo: e.target.value })
                                 }
                               />
                               {errors.serviceId && (
@@ -621,9 +623,9 @@ const FormWizard = () => {
                               <Input
                                 id="date1"
                                 type="date"
-                                value={data.step1.date}
+                                value={data.step1.dob}
                                 onChange={(e) =>
-                                  updateStep1({ date: e.target.value })
+                                  updateStep1({ dob: e.target.value })
                                 }
                               />
                               {errors.date1 && (
@@ -653,9 +655,9 @@ const FormWizard = () => {
                               <Label htmlFor="department">ESM Name</Label>
                               <Input
                                 id="department"
-                                value={data.step1.department}
+                                value={data.step1.esm}
                                 onChange={(e) =>
-                                  updateStep1({ department: e.target.value })
+                                  updateStep1({ esm: e.target.value })
                                 }
                               />
                               {errors.department && (

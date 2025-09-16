@@ -5,13 +5,14 @@ import { persist } from "zustand/middleware";
 export interface Step1 {
   _id?: string;
   name: string;              // Patient Name
-  department: string;        // ESM Name
+  esm: string;        // ESM Name
   relationship: string;      // Relationship with ESM
-  serviceId: string;         // Card No.
-  date: string;              // DOB
-  category?: string;         // category
-  serviceIdPhoto?: File | null;
+  cardNo: string;         // Card No.
+  dob: string;              // DOB
+ dom:string;
+serviceNo:string;
   file?: File | null;
+  category?: string;
 }
 
 export interface Step1_Temporary {
@@ -114,12 +115,12 @@ const initialData: FormDataAll = {
   step1: {
     _id: "",
     name: "",
-    department: "",
+    serviceNo: "",
     relationship: "",
-    serviceId: "",
-    date: "",
-    category: undefined,
-    serviceIdPhoto: null,
+    esm: "",
+    dob: "",
+    dom: "",
+    cardNo: "",
     file: null,
   },
   step1Temporary: {
