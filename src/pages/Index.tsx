@@ -8,6 +8,7 @@ import hospitalBg from "@/assets/hospital-bg.jpg";
 
 const API_BASE = "https://echs.aretehealth.tech";
 
+
 const Index = () => {
   const navigate = useNavigate();
   const [isRegister, setIsRegister] = useState(false);
