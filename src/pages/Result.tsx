@@ -274,7 +274,7 @@ const step4Surgery=  surgeryName || "";
         throw new Error("Failed to get Claim ID");
       }
 
-      setClaimId(result.claim_id);
+      setClaimId(result.message);
     } catch (error: any) {
       console.error("Upload error:", error);
       setErrors((prev) => ({
