@@ -352,7 +352,7 @@ console.log(result?.data["DOB"]," this is echs card no ")
       );
     }
   };
-
+console.log("this is good")
   const uploadTemporaryCard = async (file: File | null) => {
     if (!file) {
       updateStep1Temporary({
