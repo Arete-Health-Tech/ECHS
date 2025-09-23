@@ -22,7 +22,7 @@ interface LocationState {
   data: FormDataAll;
   matched: boolean;
 }
-
+ 
 const Result = () => {
   const [selected, setSelected] = useState<"ECHS" | "Temporary Slip">("ECHS");
   const [loadingAgain, setLoadingAgain] = useState(false);
