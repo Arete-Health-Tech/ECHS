@@ -186,6 +186,7 @@ const FormWizard = () => {
         // serviceIdPhoto: file, // Assuming the uploaded file is the service ID photo
         file: file, // Clear the file field after upload
       });
+      
       // Clear any previous errors for file1
 
       setErrors((prev) => ({ ...prev, file1: "" }));
