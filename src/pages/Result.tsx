@@ -787,7 +787,7 @@ cardNo: string;
                       { "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      {comparisons.isGenderMatched ? (
+                      {data.step3.gender ? (
                         <Check className="text-green-600 inline" />
                       ) : (
                         <X className="text-red-600 inline" />
