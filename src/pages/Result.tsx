@@ -89,7 +89,7 @@ const Result = () => {
           className="flex flex-col md:flex-row md:items-center justify-between border-b py-3 gap-2 text-sm"
         >
           <label className="font-medium capitalize text-xs md:text-sm md:w-1/3">
-          {key === "date" ? "date":key}:
+          {key === "date" ? "date":key === "serviceNo" ?"Service No":key ==="esm"?"ESM":key==="dob"?"DOB":key==="dom"?"DOM":key ==="nameOnCard"?"Name on Aadhaar Card":key ==="patientName"?"Name of Patient":key ==="pdSec"?"Polyclinic Name":key ==="doi"?"Date of Issue":key ==="noOfSessionsAllowed"?"No of Sessions Allowed":key ==="patientType"?"Patient Type":key ==="contactNo"?"ESM Contact Number":key ==="validityUpto"?"Valid Upto":key ==="referralNo"?"Referral No":key ==="relationshipWithESM"?"Relationship with ESM":key ==="claimId"?"Claim ID":key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:
           </label>
         
           <input
