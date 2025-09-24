@@ -173,7 +173,7 @@ const prescriptionGender = "Male";
 
 const step1Surgery=  "";
 const step2Surgery=  "";
-const step3Surgery=  data.step3?.notes || "";     
+const step3Surgery=  data.step3?.admission || "";     
 const step4Surgery=  surgeryName || "";
     
     // const step1.validity = data.step1.?.validUpto || "";
@@ -274,7 +274,8 @@ const step4Surgery=  surgeryName || "";
         throw new Error("Failed to get Claim ID");
       }
 
-      setClaimId(result.message);
+      // setClaimId(result.message);
+      setClaimId(result.claim_id ? result.claim_id : result.message);
     } catch (error: any) {
       console.error("Upload error:", error);
       setErrors((prev) => ({
@@ -740,7 +741,7 @@ cardNo: string;
                       {comparisons.step3Name || "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      {comparisons.step3Name || "-"}
+                      { "-"}
                     </td>
                     <td className="p-2 border  text-[10px] md:text-[14px]">
                       {comparisons.isNameMatched ? (
@@ -774,7 +775,7 @@ cardNo: string;
                       {comparisons.step3Gender || "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      {comparisons.step3Gender || "-"}
+                      { "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
                       {comparisons.isGenderMatched ? (
@@ -808,7 +809,7 @@ cardNo: string;
                       {comparisons.step3Age ?? "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      {comparisons.step3Age ?? "-"}
+                      {"-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
                       {comparisons.isAgeMatched ? (
@@ -840,7 +841,7 @@ cardNo: string;
                       {comparisons.step3Surgery?? "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      {comparisons.step4Surgery ?? "-"}
+                      {"-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
                       {comparisons.isSurgeryMatched ? (
