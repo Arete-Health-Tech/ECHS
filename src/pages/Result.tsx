@@ -79,6 +79,7 @@ const Result = () => {
       if (step === "step3") updateStep3({ [key]: value } as any);
     };
 
+    
     return Object.entries(obj).map(([key, value]) => {
       if (["file", "photo", "_id"].includes(key)) return null;
 
