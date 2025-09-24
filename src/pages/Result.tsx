@@ -867,7 +867,36 @@ cardNo: string;
         <div
           className="border border-primary rounded-sm bg-muted/50 backdrop-blur-md p-4 mb-6 text-center cursor-pointer hover:bg-muted/70 transition-colors"
         >
-          Validity Upto : {data.step3?.validityUpto || "N/A"}
+          Validity Upto :{" "}
+          {(() => {
+  const validity = data.step3?.validityUpto;
+  console.log(validity, "validity");
+
+  if (!validity) return "N/A";
+
+  // Parse DD-MM-YYYY
+  const [day, month, year] = validity.split("-").map(Number);
+  const validityDate = new Date(year, month - 1, day); // month is 0-based
+  console.log(validityDate, "validityDate");
+
+  const today = new Date();
+  console.log(today, "today");
+  today.setHours(0, 0, 0, 0);
+  validityDate.setHours(0, 0, 0, 0);
+
+  // Format back to DD-MM-YYYY
+  const formattedDate = `${day.toString().padStart(2, "0")}-${month
+    .toString()
+    .padStart(2, "0")}-${year}`;
+
+  return validityDate < today ? (
+    <span>
+      {formattedDate} <b>(Invalid Date)</b>
+    </span>
+  ) : (
+    formattedDate
+  );
+})()}
         </div>
       </section>
       
