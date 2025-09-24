@@ -564,6 +564,14 @@ cardNo: string;
       (value) => value === "" || value === null || value === undefined
     );
   };
+  useEffect(() => {
+    if (comparisons.isNameMatched) {
+      setApprovals((prev) => ({ ...prev, name: true }));
+    }
+    if (comparisons.isAgeMatched) {
+      setApprovals((prev) => ({ ...prev, age: true }));
+    }
+  }, [comparisons]);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-muted">
@@ -752,13 +760,13 @@ cardNo: string;
                       )}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px] text-center">
-                      <button
-                        onClick={() => toggleApproval("name")}
-                        className="px-2 py-1 border rounded hover:bg-gray-100"
-                      >
-                        {approvals.name ? "✅" : "❌"}
-                      </button>
-                    </td>
+                    <button
+  onClick={() => toggleApproval("name")}
+  className="px-2 py-1 border rounded hover:bg-gray-100"
+>
+  {approvals.name ? "✅" : "❌"}
+</button>
+</td>
                   </tr>
 
                   {/* Gender */}
@@ -820,12 +828,12 @@ cardNo: string;
                       )}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px] text-center">
-                      <button
-                        onClick={() => toggleApproval("age")}
-                        className="px-2 py-1 border rounded hover:bg-gray-100"
-                      >
-                        {approvals.age ? "✅" : "❌"}
-                      </button>
+                    <button
+    onClick={() => toggleApproval("age")}
+    className="px-2 py-1 border rounded hover:bg-gray-100"
+  >
+    {approvals.age ? "✅" : "❌"}
+  </button>
                     </td>
                   </tr>
                   <tr>
