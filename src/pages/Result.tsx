@@ -660,6 +660,16 @@ cardNo: string;
               investigation: "",
               file: null,
             };
+            data.step4 = {
+              _id: "",
+              patientName:"",
+              age: "",
+              diagnosis: "",
+              advice: "",
+              treatment_plan: "",
+              // medication: [],
+              file: null,
+            };
           }}
         >
           New Submission
