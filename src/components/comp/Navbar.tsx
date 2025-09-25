@@ -18,7 +18,7 @@ import { useFormStore } from "@/store/formStore";
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const { data, updateStep1, updateStep2, updateStep3, updateStep1Temporary } =
+  const { data, updateStep1, updateStep2, updateStep3,updateStep4, updateStep1Temporary } =
   useFormStore();
 
   const handleLogout = () => {
@@ -87,6 +87,16 @@ const Navbar: React.FC = () => {
       relationshipWithESM: "",
       investigation: "",
     });
+    updateStep4({
+      _id: "",
+      patientName:"",
+      age: "",
+      diagnosis: "",
+      advice: "",
+      treatment_plan: "",
+      // medication: [],
+      file: null,
+    })
 
     navigate("/login");
   };
