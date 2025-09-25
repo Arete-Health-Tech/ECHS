@@ -640,29 +640,13 @@ console.log("this is good")
     if (!file) {
       updateStep4({
         _id: "",
-        cardNo: "",
-        serviceNo: "",
-        patientName: "",
-        category: "",
-        doi: "",
-        noOfSessionsAllowed: "",
-        patientType: "",
-        pdSec: "",
-        contactNo: "",
+        patientName:"",
         age: "",
-        gender: "",
-        validityUpto: "",
-        referralNo: "",
-        claimId: "",
-        notes: "",
-        date: "",
+        diagnosis: "",
+        advice: "",
+        treatment_plan: "",
+        // medication: [],
         file: null,
-        photo: null,
-        admission: "",
-        consultationFor: "",
-        esmName: "",
-        relationshipWithESM: "",
-        investigation: "",
       });
       console.log("inside Prescription file if condition");
       setErrors((prev) => ({ ...prev, file1: "File is required" }));
@@ -670,35 +654,19 @@ console.log("this is good")
     }
 
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("files", file);
     // setFileRefferals(file)
 
     const token = localStorage.getItem("access_token");
     updateStep4({
       _id: "",
-      cardNo: "",
-      serviceNo: "",
-      patientName: "",
-      category: "",
-      doi: "",
-      noOfSessionsAllowed: "",
-      patientType: "",
-      pdSec: "",
-      contactNo: "",
+      patientName:"",
       age: "",
-      gender: "",
-      validityUpto: "",
-      referralNo: "",
-      claimId: "",
-      notes: "",
-      date: "",
+      diagnosis: "",
+      advice: "",
+      treatment_plan: "",
+      // medication: [],
       file: null,
-      photo: null,
-      admission: "",
-      consultationFor: "",
-      esmName: "",
-      relationshipWithESM: "",
-      investigation: "",
     });
     console.log("outside after empty Referral Letter file if condition");
     setErrors((prev) => ({ ...prev, file1: "" }));
@@ -717,32 +685,16 @@ console.log("this is good")
       }
 
       const result = await response.json();
-      console.log("Upload successful: REFERRAL", result);
+      console.log("Upload successful: prescription", result);
       updateStep4({
         _id: result.ocr_result_id || "",
-        cardNo: result?.data?.["Card No"] ?? "",
-        serviceNo: result?.data?.["Service No"] ?? "",
-        patientName: result?.data?.["Name of Patient"] ?? "",
-        category: result?.data?.["Category"] ?? "",
-        doi: result?.data?.["Date of Issue"] ?? "",
-        noOfSessionsAllowed: result?.data?.["No of Sessions Allowed"] ?? "",
-        patientType: result?.data?.["Patient Type"] ?? "",
-        pdSec: result?.data?.["Polyclinic Remarks"] ?? "",
-        contactNo: result?.data?.["ESM Contact Number"] ?? "",
-        age: result?.data?.["Age"] ?? "",
-        gender: result?.data?.["Gender"] ?? "",
-        validityUpto:result?.data?.["Valid Upto"] ?? "",
-        referralNo: result?.data?.["Referral No"] ?? "",
-        claimId: result?.data?.["Claim ID"] ?? "Not Found",
-        notes: result?.data?.["Clinical Notes"] ?? "",
-        admission: result?.data?.["Admission"] ?? "",
-        consultationFor: result?.data?.["Consultation For"] ?? "",
-        esmName: result?.data?.["ESM Name"] ?? "",
-        relationshipWithESM: result?.data?.["Relationship with ESM"] ?? "",
-        investigation: result?.data?.["Investigation"] ?? "",
-
-        // date: "",
-        file: file,
+        age: (result?.data?.["age"] ?? "").match(/\d+/)?.[0] ?? "",            // ✅ correct mapping
+        patientName: result?.data?.["name"] ?? "",
+        diagnosis: result?.data?.["diagnosis"] ?? "",
+        advice: result?.data?.["advice"] ?? "",
+        treatment_plan: result?.data?.["treatment_plan"] ?? [],  // ✅ array
+        // medication: result?.data?.["medication"] ?? [],  
+        file: file,        // ✅ array of objects
       });
 
       setErrors((prev) => ({ ...prev, file1: "" }));

@@ -67,30 +67,19 @@ export interface Step3 {
 }
 export interface Step4 {
   _id?: string;
-  cardNo: string;
-  serviceNo: string;
   patientName: string;
-  category: string;
-  doi: string;
-  noOfSessionsAllowed: string;
-  patientType: string;
-  pdSec: string;
-  contactNo: string;
-  age: string;
-  gender: string;
-  validityUpto: string;
-  referralNo: string;
-  claimId: string;
-  notes: string;
-  date: string;
+  age: string; // e.g. "56 Y 9 M 9 D"
+  diagnosis: string; // e.g. "CAD: Unstable Angina, Good LV Function, No RWMA"
+  advice: string;
   file?: File | null;
-  photo?: File | null;
-  admission?: string;
-  consultationFor?: string;
-  esmName: string;
-  relationshipWithESM: string;
-  investigation: string;
+  // medication?: Array<{
+  //   name: string;
+  //   dosage?: string;
+  // }>;
+  treatment_plan?: string | Record<string, unknown>;
 }
+
+
 
 export interface FormDataAll {
   step1: Step1;
@@ -173,29 +162,13 @@ const initialData: FormDataAll = {
   },
   step4: {
     _id: "",
-    cardNo: "",
-    serviceNo: "",
-    patientName: "",
-    category: "",
-    doi: "",
-    noOfSessionsAllowed: "",
-    patientType: "",
-    pdSec: "",
-    contactNo: "",
+    patientName:"",
     age: "",
-    gender: "",
-    validityUpto: "",
-    referralNo: "",
-    claimId: "",
-    notes: "",
-    date: "",
+    diagnosis: "",
+    advice: "",
+    treatment_plan: "",
+    // medication: [],
     file: null,
-    photo: null,
-    admission: "",
-    consultationFor: "",
-    esmName: "",
-    relationshipWithESM: "",
-    investigation: "",
   },
 };
 

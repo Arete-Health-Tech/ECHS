@@ -11,7 +11,7 @@ import {
   X,
   XCircle,
 } from "lucide-react";
-import { Step1_Temporary, Step2, Step3, useFormStore, type FormDataAll } from "@/store/formStore";
+import { Step1_Temporary, Step2, Step3, Step4, useFormStore, type FormDataAll } from "@/store/formStore";
 import Image1 from "@/assets/Cooreecr.png";
 import Image2 from "@/assets/Screenshot 2025-08-12 at 3.18.25 PM.png";
 import Navbar from "@/components/comp/Navbar";
@@ -31,6 +31,7 @@ const Result = () => {
     step1Temporary: false,
     step2: false,
     step3: false,
+    step4: false,
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -50,6 +51,7 @@ const Result = () => {
     updateStep1Temporary,
     updateStep2,
     updateStep3,
+    updateStep4,
     reset,
   } = useFormStore();
 
@@ -77,6 +79,7 @@ const Result = () => {
         updateStep1Temporary({ [key]: value } as any);
       if (step === "step2") updateStep2({ [key]: value } as any);
       if (step === "step3") updateStep3({ [key]: value } as any);
+      if (step === "step4") updateStep4({ [key]: value } as any);
     };
 
     
@@ -132,25 +135,18 @@ const Result = () => {
     }));
   };
 
-  // const surgeryName = "Hernia"
-  const surgeryName = "Hernia"
-//Name for prescription 
-const prescriptionName =  "Testing";
-const prescriptionAge =  "45";
-const prescriptionGender = "Male";
+
   // Comparisons
   const comparisons = useMemo(() => {
     if (!data) return null;
-const surgeryName = "cystoscopy with TURBT with OIU- as adv by tt spl"
+
 //Name for prescription 
-const prescriptionName =  "Testing";
-const prescriptionAge =  "45";
-const prescriptionGender = "Male";
+
 
     const step1Name = data.step1?.name || data.step1Temporary?.name;
     const step2Name = data.step2?.nameOnCard;
     const step3Name = data.step3?.patientName;
-  const step4Name = prescriptionName || "";
+  const step4Name = data.step4?.patientName;
    
     // const step4Surgery = data.step4?.surgeryName;
 
@@ -159,7 +155,7 @@ const prescriptionGender = "Male";
       data.step1?.category || data.step1Temporary?.category || "";
     const step2Gender = data.step2?.gender || "";
     const step3Gender = data.step3?.gender || "";
-    const step4Gender = prescriptionGender || "";
+    // const step4Gender = prescriptionGender || "";
     
 
     const step1Age = data.step1?.dob
@@ -170,12 +166,12 @@ const prescriptionGender = "Male";
 
     const step2Age = data.step2?.dob ? calculateAge(data.step2.dob) : undefined;
     const step3Age = data.step3?.age ? Number(data.step3.age) : undefined;
-    const step4Age = prescriptionAge || "";
+    const step4Age = data.step4?.age?.match(/\d+/)?.[0] ?? "";
 
 const step1Surgery=  "";
 const step2Surgery=  "";
 const step3Surgery=  data.step3?.admission || "";     
-const step4Surgery=  surgeryName || "";
+const step4Surgery=   data.step4.advice|| "";
     
     // const step1.validity = data.step1.?.validUpto || "";
 
@@ -204,6 +200,9 @@ const step4Surgery=  surgeryName || "";
       const isSurgeryMatched =  step3Surgery && step4Surgery && step3Surgery.trim().toLowerCase() === step4Surgery.trim().toLowerCase();
 
     return {
+      step4Name,
+      step4Surgery,
+      step4Age,
       step1Name,
       step2Name,
       step3Name,
@@ -219,7 +218,6 @@ const step4Surgery=  surgeryName || "";
       step1Surgery,
       step2Surgery,
       step3Surgery,
-      step4Surgery,
       isSurgeryMatched,
       allMatched: isNameMatched && isGenderMatched && isAgeMatched && isSurgeryMatched,
     };
@@ -442,6 +440,15 @@ cardNo: string;
       "Claim ID": step3.claimId || "Not Found",
     };
   }
+  function transformStep4(step4: Step4) {
+    return {
+      "name": step4.patientName|| "",
+      "age": step4.age || "",
+      "diagnosis": step4.diagnosis || "",
+      "advice": step4.advice || "",
+     
+    };
+  }
   console.log({ data })
 
   const handleValidateAgain = async () => {
@@ -452,11 +459,13 @@ cardNo: string;
       let temporary_slip_file = data.step1Temporary.file;
       let aadhar_card_file = data.step2.file;
       let referral_letter_file = data.step3.file;
+      let prescription_file = data.step4.file;
       const payload: Record<string, any> = {};
       payload.echs_card = transformStep1(data.step1);
       payload.temporary_slip = transformStep1Temporary(data.step1Temporary);
       payload.aadhar_card = transformStep2(data.step2)
       payload.referral_letter = transformStep3(data.step3);
+      payload.prescription =  transformStep4(data.step4);
       const res = await fetch(`https://echs.aretehealth.tech/request_update/${requestId}`, {
         method: "PUT",
         headers: {
@@ -480,6 +489,10 @@ cardNo: string;
             {
               "doc_type": "referral_letter",
               extracted_data: payload.referral_letter
+            },
+            {
+              "doc_type": "prescription",
+              extracted_data: payload.prescription
             }
           ]
         })// send whatever your API needs
@@ -546,6 +559,15 @@ cardNo: string;
         relationshipWithESM: result?.data["Relationship with ESM"],
         investigation: result?.data["Investigation"],
         file: referral_letter_file, // Clear the file field after upload
+      });
+      if (result.step4) updateStep4({
+        _id: result.ocr_result_id || "",
+        patientName: result?.data["name"],
+        age: result?.data["age"],
+        diagnosis: result?.data["diagnosis"],
+        advice: result?.data["advice"],
+        file: prescription_file, // Clear the file field after upload
+        
       });
       callForHistory();
       toast.success("Validation completed");
@@ -750,7 +772,7 @@ cardNo: string;
                       {comparisons.step3Name || "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      { "-"}
+                      {comparisons.step4Name|| "-"}
                     </td>
                     <td className="p-2 border  text-[10px] md:text-[14px]">
                       {comparisons.isNameMatched ? (
@@ -818,7 +840,7 @@ cardNo: string;
                       {comparisons.step3Age ?? "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      {"-"}
+                      {comparisons.step4Age||"-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
                       {comparisons.isAgeMatched ? (
@@ -850,7 +872,7 @@ cardNo: string;
                       {comparisons.step3Surgery?? "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      {"-"}
+                      {comparisons.step4Surgery||"-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
                       {comparisons.isSurgeryMatched ? (
@@ -965,6 +987,18 @@ cardNo: string;
           </CardHeader>
           {expanded.step3 && (
             <CardContent>{renderDetails(data.step3, "step3")}</CardContent>
+          )}
+        </Card>
+        <Card className={isEmptyObject(data.step4) ? "opacity-50 pointer-events-none" : ""}>
+          <CardHeader
+            className="flex justify-between cursor-pointer"
+            onClick={() => !isEmptyObject(data.step4) && toggleSection("step4")}
+          >
+            <CardTitle className="text-base">Step 4 - Prescription</CardTitle>
+            {expanded.step4 ? <ChevronUp /> : <ChevronDown />}
+          </CardHeader>
+          {expanded.step4 && (
+            <CardContent>{renderDetails(data.step4, "step4")}</CardContent>
           )}
         </Card>
         <Button
