@@ -51,59 +51,71 @@ const ImageModal = ({ isOpen, onClose, imageUrl, fileName }) => {
 };
 
 // File Preview Component
-const FilePreview = ({ file, onView, onRemove }) => {
+const FilePreview = ({
+  file,
+  onView,
+  onRemove,
+}: {
+  file: File | File[] | null;
+  onView: (url: string, name: string) => void;
+  onRemove: (index: number) => void;
+}) => {
   if (!file) return null;
 
-  const isImage = file.type.startsWith("image/");
-  const isPDF = file.type === "application/pdf";
-
-  if (isImage) {
-    const url = URL.createObjectURL(file);
-    return (
-      <div className="relative group">
-        <div className="relative">
-          <img
-            src={url}
-            alt="Document preview"
-            className="h-20 w-20 rounded-md object-cover border border-border cursor-pointer"
-            onClick={() => onView(url, file.name)}
-          />
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-md flex items-center justify-center">
-            <Eye className="h-5 w-5 text-white" />
-          </div>
-        </div>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={onRemove}
-          className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
-        >
-          <X className="h-3 w-3" />
-        </Button>
-        <p className="text-xs text-center mt-1 truncate max-w-20">
-          {file.name}
-        </p>
-      </div>
-    );
-  }
+  const filesArray = Array.isArray(file) ? file : [file];
 
   return (
-    <div className="relative group">
-      <div className="h-20 w-20 rounded-md border border-border bg-muted flex flex-col items-center justify-center p-2">
-        <FileText className="h-8 w-8 text-muted-foreground" />
-        <span className="text-xs text-center">{isPDF ? "PDF" : "File"}</span>
-      </div>
-      <Button
-        variant="destructive"
-        size="sm"
-        onClick={onRemove}
-        className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
-      >
-        <X className="h-3 w-3" />
-      </Button>
-      <p className="text-xs text-center mt-1 truncate max-w-20">{file.name}</p>
+    <div className="flex gap-2 flex-wrap">
+      {filesArray.map((f, idx) => {
+        const isImage = f.type.startsWith("image/");
+        const isPDF = f.type === "application/pdf";
+        const url = isImage ? URL.createObjectURL(f) : undefined;
+
+        return (
+          <div key={idx} className="relative group">
+            {isImage ? (
+              <div className="relative">
+                <img
+                  src={url}
+                  alt="Document preview"
+                  className="h-20 w-20 rounded-md object-cover border border-border cursor-pointer"
+                  onClick={() => onView(url!, f.name)}
+                />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-md flex items-center justify-center">
+                  <Eye className="h-5 w-5 text-white" />
+                </div>
+              </div>
+            ) : (
+              <div className="h-20 w-20 rounded-md border border-border bg-muted flex flex-col items-center justify-center p-2">
+                <FileText className="h-8 w-8 text-muted-foreground" />
+                <span className="text-xs text-center">{isPDF ? "PDF" : "File"}</span>
+              </div>
+            )}
+
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => onRemove(idx)}
+              className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+
+            <p className="text-xs text-center mt-1 truncate max-w-20">{f.name}</p>
+          </div>
+        );
+      })}
     </div>
   );
+};
+
+type UploadTileProps = {
+  label: string;
+  accept: string;
+  file: File | File[] | null;
+  onChange: (file: File | File[] | null) => void;
+  hint?: string;
+  multiple?: boolean;
 };
 
 const UploadTile = ({
@@ -112,13 +124,8 @@ const UploadTile = ({
   file,
   onChange,
   hint,
-}: {
-  label: string;
-  accept: string;
-  file: File | null | undefined;
-  onChange: (file: File | null) => void;
-  hint?: string;
-}) => {
+  multiple = false,
+}: UploadTileProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalImage, setModalImage] = useState({ url: "", name: "" });
@@ -128,10 +135,19 @@ const UploadTile = ({
     setModalOpen(true);
   };
 
-  const handleRemoveFile = (e) => {
-    e.stopPropagation();
-    onChange(null);
+  const handleRemoveFile = (index: number) => {
+    if (!file) return;
+    let newFiles: File[] | null = [];
+    if (Array.isArray(file)) {
+      newFiles = [...file];
+      newFiles.splice(index, 1);
+    } else {
+      newFiles = null;
+    }
+    onChange(newFiles);
   };
+
+  const filesArray = Array.isArray(file) ? file : file ? [file] : [];
 
   return (
     <>
@@ -145,7 +161,23 @@ const UploadTile = ({
             type="file"
             accept={accept}
             className="hidden"
-            onChange={(e) => onChange(e.target.files?.[0] || null)}
+            multiple={multiple}
+            onChange={(e) => {
+              if (!e.target.files) return;
+
+              const selectedFiles = Array.from(e.target.files);
+
+              let updatedFiles: File[] = [];
+
+              if (multiple) {
+                // Merge old + new files, enforce max 2
+                updatedFiles = [...filesArray, ...selectedFiles].slice(0, 2);
+              } else {
+                updatedFiles = [selectedFiles[0]];
+              }
+
+              onChange(multiple ? updatedFiles : updatedFiles[0]);
+            }}
           />
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
@@ -154,32 +186,35 @@ const UploadTile = ({
             <div className="flex-1">
               <p className="font-medium">{label}</p>
               <p className="text-xs text-muted-foreground">
-                {hint ||
-                  (accept.includes("pdf") ? "Image or PDF" : "Image files")}
+                {hint || (accept.includes("pdf") ? "Image or PDF" : "Image files")}
               </p>
-              {!file && (
+              {!filesArray.length && (
                 <p className="text-xs text-primary mt-1">Click to upload</p>
               )}
             </div>
           </div>
         </div>
 
-        {/* File Preview Section */}
-        {file && (
-          <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
-            <FilePreview
-              file={file}
-              onView={handleViewImage}
-              onRemove={handleRemoveFile}
-            />
-            <div className="flex-1">
-              <p className="text-sm font-medium">{file.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {(file.size / 1024 / 1024).toFixed(2)} MB
-              </p>
+        {/* File Preview */}
+        {filesArray.length > 0 &&
+          filesArray.map((f, idx) => (
+            <div
+              key={idx}
+              className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg"
+            >
+              <FilePreview
+                file={f}
+                onView={handleViewImage}
+                onRemove={() => handleRemoveFile(idx)}
+              />
+              <div className="flex-1">
+                <p className="text-sm font-medium">{f.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {(f.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          ))}
       </div>
 
       <ImageModal
@@ -192,6 +227,7 @@ const UploadTile = ({
   );
 };
 
+
 const UploadDocument = () => {
   const [selected, setSelected] = useState<"ECHS" | "Temporary Slip">("ECHS");
   const navigate = useNavigate();
@@ -201,7 +237,7 @@ const UploadDocument = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Object | null>(null);
 
-  const { data, updateStep1, updateStep2, updateStep3,updateStep4,updateStep1Temporary } =
+  const { data, updateStep1, updateStep2, updateStep3, updateStep4, updateStep1Temporary } =
     useFormStore();
 
 
@@ -286,7 +322,7 @@ const UploadDocument = () => {
         relationship: "",
         serviceNo: "",
         dob: "",
-        dom:"",
+        dom: "",
         file: null,
       });
       setErrors((prev) => ({ ...prev, file1: "File is required" }));
@@ -299,14 +335,14 @@ const UploadDocument = () => {
     const token = localStorage.getItem("access_token");
     updateStep1({
       _id: "",
-        name: "",
-        cardNo: "",
-        esm: "",
-        relationship: "",
-        serviceNo: "",
-        dob: "",
-        dom:"",
-        file: null,
+      name: "",
+      cardNo: "",
+      esm: "",
+      relationship: "",
+      serviceNo: "",
+      dob: "",
+      dom: "",
+      file: null,
     });
     console.log("outside ECHS file if condition");
     setErrors((prev) => ({ ...prev, file1: "" }));
@@ -325,14 +361,14 @@ const UploadDocument = () => {
 
       const result = await response.json();
       console.log("Upload successful: ECHS", result);
-console.log(result?.data["DOB"]," this is echs card no ")
+      console.log(result?.data["DOB"], " this is echs card no ")
       updateStep1({
         _id: result.ocr_result_id || "",
         cardNo: result?.data["Card No"],
         dob: formatDateForInput(result?.data["DOB"]),
         name: result?.data["Patient Name"],
         esm: result?.data["ESM"],
-        dom:formatDateForInput(result?.data["DOM"]),
+        dom: formatDateForInput(result?.data["DOM"]),
         relationship: result?.data["Relationship with ESM"],
         serviceNo: result?.data["Service No"],
         // serviceIdPhoto: file, // Assuming the uploaded file is the service ID photo
@@ -352,7 +388,7 @@ console.log(result?.data["DOB"]," this is echs card no ")
       );
     }
   };
-console.log("this is good")
+  console.log("this is good")
   const uploadTemporaryCard = async (file: File | null) => {
     if (!file) {
       updateStep1Temporary({
@@ -601,14 +637,14 @@ console.log("this is good")
         serviceNo: result?.data?.["Service No"] ?? "",
         patientName: result?.data?.["Name of Patient"] ?? "",
         category: result?.data?.["Category"] ?? "",
-        doi:result?.data?.["Date of Issue"] ?? "",
+        doi: result?.data?.["Date of Issue"] ?? "",
         noOfSessionsAllowed: result?.data?.["No of Sessions Allowed"] ?? "",
         patientType: result?.data?.["Patient Type"] ?? "",
         pdSec: result?.data?.["Polyclinic Remarks"] ?? "",
         contactNo: result?.data?.["ESM Contact Number"] ?? "",
         age: result?.data?.["Age"] ?? "",
         gender: result?.data?.["Gender"] ?? "",
-        validityUpto:result?.data?.["Valid Upto"] ?? "",
+        validityUpto: result?.data?.["Valid Upto"] ?? "",
         referralNo: result?.data?.["Referral No"] ?? "",
         claimId: result?.data?.["Claim ID"] ?? "Not Found",
         notes: result?.data?.["Clinical Notes"] ?? "",
@@ -636,16 +672,15 @@ console.log("this is good")
     }
   };
 
-  const uploadPrescription = async (file: File | null) => {
-    if (!file) {
+  const uploadPrescription = async (files: File[] | null) => {
+    if (!files || files.length === 0) {
       updateStep4({
         _id: "",
-        patientName:"",
+        patientName: "",
         age: "",
         diagnosis: "",
         advice: "",
         treatment_plan: "",
-        // medication: [],
         file: null,
       });
       console.log("inside Prescription file if condition");
@@ -654,13 +689,12 @@ console.log("this is good")
     }
 
     const formData = new FormData();
-    formData.append("files", file);
-    // setFileRefferals(file)
+    files.slice(0, 2).forEach((file) => formData.append("files", file));
 
     const token = localStorage.getItem("access_token");
     updateStep4({
       _id: "",
-      patientName:"",
+      patientName: "",
       age: "",
       diagnosis: "",
       advice: "",
@@ -686,15 +720,15 @@ console.log("this is good")
 
       const result = await response.json();
       console.log("Upload successful: prescription", result);
+
       updateStep4({
         _id: result.ocr_result_id || "",
-        age: (result?.data?.["age"] ?? "").match(/\d+/)?.[0] ?? "",            // ✅ correct mapping
+        age: (result?.data?.["age"] ?? "").match(/\d+/)?.[0] ?? "",
         patientName: result?.data?.["name"] ?? "",
         diagnosis: result?.data?.["diagnosis"] ?? "",
         advice: result?.data?.["advice"] ?? "",
-        treatment_plan: result?.data?.["treatment_plan"] ?? [],  // ✅ array
-        // medication: result?.data?.["medication"] ?? [],  
-        file: file,        // ✅ array of objects
+        treatment_plan: result?.data?.["treatment_plan"] ?? [],
+        file: files.slice(0, 2), // ✅ enforce max 2 files
       });
 
       setErrors((prev) => ({ ...prev, file1: "" }));
@@ -711,7 +745,7 @@ console.log("this is good")
     }
   };
 
-  
+
 
   //   const getClaimID = async (file: File | null) => {
   //     if (!file) {
@@ -781,11 +815,11 @@ console.log("this is good")
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    console.log(year,month,day, " this is date string");
+    console.log(year, month, day, " this is date string");
     return `${year}-${month}-${day}`;
   };
-  
-  
+
+
   console.log(data, " this is upload data ")
   const uploadAllDocument = async () => {
     setLoading(true);
@@ -841,7 +875,7 @@ console.log("this is good")
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchTerm.trim() && searchTerm !== "") {
       fetchSearchResults(searchTerm);
-    }else{
+    } else {
       setSearchResults(null);
     }
   };
@@ -903,8 +937,9 @@ console.log("this is good")
                     label="Upload ECHS Card"
                     accept="image/*,application/pdf"
                     file={data.step1.file || null}
-                    onChange={(f) => updateStep1({ file: f })}
+                    onChange={(f) => updateStep1({ file: f as File | null })}
                     hint="Related ECHS Card (Image/PDF)"
+                    multiple={false}
                   />
                 </div>
               ) : (
@@ -912,9 +947,10 @@ console.log("this is good")
                   <UploadTile
                     label="Upload Temporary Slip"
                     accept="image/*,application/pdf"
-                    file={data.step1Temporary.file || null}
-                    onChange={(f) => updateStep1Temporary({ file: f })}
+                    file={data.step1Temporary.file || null}  // File | null
+                    onChange={(f) => updateStep1Temporary({ file: f as File | null })}
                     hint="Related Temporary Slip (Image/PDF)"
+                    multiple={false}  // explicitly single-file
                   />
                 </div>
               )}
@@ -924,9 +960,10 @@ console.log("this is good")
                 <UploadTile
                   label="Aadhaar Card"
                   accept=".jpg,.jpeg,.png,.pdf"
-                  file={data?.step2?.file}
-                  onChange={(file) => updateStep2({ file })}
+                  file={data?.step2?.file || null} // File | null
+                  onChange={(file) => updateStep2({ file: file as File | null })}
                   hint="Upload Aadhaar card scan/photo"
+                  multiple={false} // explicitly single-file
                 />
               </div>
 
@@ -935,19 +972,21 @@ console.log("this is good")
                 <UploadTile
                   label="Referral Letter"
                   accept=".jpg,.jpeg,.png,.pdf"
-                  file={data.step3.file}
-                  onChange={(file) => updateStep3({ file })}
+                  file={data.step3.file || null}           // File | null
+                  onChange={(file) => updateStep3({ file: file as File | null })}
                   hint="Upload referral letter document"
+                  multiple={false}                         // explicitly single-file
                 />
               </div>
               {/*Step 4 - Prescription Details */}
- <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <UploadTile
                   label="Prescription"
                   accept=".jpg,.jpeg,.png,.pdf"
-                  file={data.step4.file}
-                  onChange={(file) => updateStep4({ file })}
-                  hint="Upload prescription"
+                  file={data.step4.file || null} // File[] | null
+                  onChange={(f) => updateStep4({ file: f as File[] | null })}
+                  hint="Upload prescription (1-2 files)"
+                  multiple={true}
                 />
               </div>
               {/* Errors */}
@@ -994,22 +1033,22 @@ console.log("this is good")
             </CardHeader>
 
             <CardContent>
-               {/* Example of showing results */}
-                  {searchResults !== null ? (
-                    <div>
-                          <div>
-                            {`Name Of the Patient : ${searchResults?.['referral_letter']?.['extracted_data']?.["Name of Patient"]}`}
-                          </div>
-                          <div>
-                            {`Claim ID : ${searchResults?.['referral_letter']?.['extracted_data']?.["Claim ID"]}`}
-                          </div>
-                          <div>
-                            {`Referral No : ${searchResults?.['referral_letter']?.['extracted_data']?.["Referral No"]}`}
-                          </div>
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">No data available.</p>
-                  )}
+              {/* Example of showing results */}
+              {searchResults !== null ? (
+                <div>
+                  <div>
+                    {`Name Of the Patient : ${searchResults?.['referral_letter']?.['extracted_data']?.["Name of Patient"]}`}
+                  </div>
+                  <div>
+                    {`Claim ID : ${searchResults?.['referral_letter']?.['extracted_data']?.["Claim ID"]}`}
+                  </div>
+                  <div>
+                    {`Referral No : ${searchResults?.['referral_letter']?.['extracted_data']?.["Referral No"]}`}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-muted-foreground">No data available.</p>
+              )}
             </CardContent>
           </Card>
         </section>

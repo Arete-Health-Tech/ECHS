@@ -71,11 +71,7 @@ export interface Step4 {
   age: string; // e.g. "56 Y 9 M 9 D"
   diagnosis: string; // e.g. "CAD: Unstable Angina, Good LV Function, No RWMA"
   advice: string;
-  file?: File | null;
-  // medication?: Array<{
-  //   name: string;
-  //   dosage?: string;
-  // }>;
+  file?: File[]; // 1 or 2 images allowed
   treatment_plan?: string | Record<string, unknown>;
 }
 
