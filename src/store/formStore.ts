@@ -17,14 +17,14 @@ serviceNo:string;
 
 export interface Step1_Temporary {
   _id?: string;
-  name: string;              // Patient Name
-  esmName: string;           // ESM Name
-  relationship: string;      // Relationship with ESM
-  serviceId: string;         // Service No.
-  temporaryId: string;       // Temporary Slip No.
-  category: string;          // category
-  date: string;              // DOB
-  validUpto: string;         // Valid Upto
+  patient_name: string;              // Patient Name
+  esm: string;           // ESM Name
+  relationship_with_esm: string;      // Relationship with ESM
+  category_of_ward: string;
+  dob: string;
+  form_no: string;
+  registration_no: string;
+  valid_upto: string;
   file?: File | null;
   oicStamp: boolean;         // OIC Stamp
 }
@@ -64,14 +64,23 @@ export interface Step3 {
   esmName: string;
   relationshipWithESM: string;
   investigation: string;
+  referredTo: string;
 }
+
+export interface Medication {
+  name: string;
+  dosage: string;
+}
+
 export interface Step4 {
   _id?: string;
   patientName: string;
   age: string; // e.g. "56 Y 9 M 9 D"
+  gender: string;
   diagnosis: string; // e.g. "CAD: Unstable Angina, Good LV Function, No RWMA"
   advice: string;
   file?: File[]; // 1 or 2 images allowed
+  medication?: Medication[]; 
   treatment_plan?: string | Record<string, unknown>;
 }
 
@@ -110,14 +119,14 @@ const initialData: FormDataAll = {
   },
   step1Temporary: {
     _id: "",
-    name: "",
-    esmName: "",
-    relationship: "",
-    serviceId: "",
-    temporaryId: "",
-    category: "",
-    date: "",
-    validUpto: "",
+    patient_name: "",
+    esm: "",
+    relationship_with_esm: "",
+    category_of_ward: "",
+    dob: "",
+    valid_upto: "",
+    registration_no: "",
+    form_no: "",
     file: null,
     oicStamp: false,
   },
@@ -155,15 +164,17 @@ const initialData: FormDataAll = {
     esmName: "",
     relationshipWithESM: "",
     investigation: "",
+    referredTo: "",
   },
   step4: {
     _id: "",
-    patientName:"",
+    patientName: "",
     age: "",
+    gender: "",
     diagnosis: "",
     advice: "",
     treatment_plan: "",
-    // medication: [],
+    medication: [],
     file: null,
   },
 };

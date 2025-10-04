@@ -264,18 +264,20 @@ const UploadDocument = () => {
         newErrors.relationship = "Relationship with ESM is required";
     }
     if (selected === "Temporary Slip") {
-      if (!data.step1Temporary.name) newErrors.name = "Name is required";
-      if (!data.step1Temporary.esmName)
-        newErrors.esmName = "ESM Name is required";
-      if (!data.step1Temporary.serviceId)
-        newErrors.serviceId = "Service ID is required";
-      if (!data.step1Temporary.temporaryId)
-        newErrors.temporaryId = "Temporary ID is required";
-      if (!data.step1Temporary.category)
-        newErrors.category = "Category is required";
-      if (!data.step1Temporary.date) newErrors.date = "DOB is required";
-      if (!data.step1Temporary.validUpto)
-        newErrors.validUpto = "Valid Upto date is required";
+      if (!data.step1Temporary.patient_name) newErrors.patient_name = "Name is required";
+      if (!data.step1Temporary.esm)
+        newErrors.esm = "ESM Name is required";
+      if (!data.step1Temporary.form_no)
+        newErrors.form_no = "Form No is required";
+      if (!data.step1Temporary.registration_no)
+        newErrors.registration_no = "Registration No is required";
+      if (!data.step1Temporary.category_of_ward)
+        newErrors.category_of_ward = "Category of Ward is required";
+      if (!data.step1Temporary.dob) newErrors.dob = "DOB is required";
+      if (!data.step1Temporary.valid_upto)
+        newErrors.valid_upto = "Valid Upto date is required";
+      if (!data.step1Temporary.relationship_with_esm)
+        newErrors.relationship_with_esm = "Relationship With ESM is required";
     }
     if (step === 2) {
       if (!data.step2.aadhaarNumber)
@@ -393,14 +395,14 @@ const UploadDocument = () => {
     if (!file) {
       updateStep1Temporary({
         _id: "",
-        name: "",
-        esmName: "",
-        relationship: "",
-        serviceId: "",
-        temporaryId: "",
-        category: "",
-        date: "",
-        validUpto: "",
+        patient_name: "",
+        esm: "",
+        relationship_with_esm: "",
+        form_no: "",
+        registration_no: "",
+        category_of_ward: "",
+        dob: "",
+        valid_upto: "",
         file: null,
         oicStamp: false
       });
@@ -417,14 +419,14 @@ const UploadDocument = () => {
 
     updateStep1Temporary({
       _id: "",
-      name: "",
-      esmName: "",
-      relationship: "",
-      serviceId: "",
-      temporaryId: "",
-      category: "",
-      date: "",
-      validUpto: "",
+      patient_name: "",
+      esm: "",
+      relationship_with_esm: "",
+      form_no: "",
+      registration_no: "",
+      category_of_ward: "",
+      dob: "",
+      valid_upto: "",
       file: null,
       oicStamp: false
     });
@@ -450,14 +452,14 @@ const UploadDocument = () => {
 
       updateStep1Temporary({
         _id: result.ocr_result_id || "",
-        esmName: result?.data["Patient Name"],
-        name: result?.data["ESM"],
-        relationship: result?.data["Relationship with ESM"],
-        serviceId: result?.data["Form No"],
-        temporaryId: result?.data["Temporary Slip No"],
-        category: result?.data["Category"],
-        date: formatDateForInput(result?.data["DOB"]),
-        validUpto: formatDateForInput(result?.data["Valid Upto"]),
+        esm: result?.data["ESM"],
+        patient_name: result?.data["Patient Name"],
+        relationship_with_esm: result?.data["Relationship With Esm"],
+        form_no: result?.data["Form No"],
+        registration_no: result?.data["Registration No"],
+        category_of_ward: result?.data["Category of Ward"],
+        dob: formatDateForInput(result?.data["DOB"]),
+        valid_upto: formatDateForInput(result?.data["Valid Upto"]),
         oicStamp: result?.data["OIC Stamp"] === "Found",
         file: file, // Clear the file field after upload
       });
@@ -547,7 +549,6 @@ const UploadDocument = () => {
       );
     }
   };
-  console.log(data);
 
   const uploadRefferalLetter = async (file: File | null) => {
     if (!file) {
@@ -576,6 +577,7 @@ const UploadDocument = () => {
         esmName: "",
         relationshipWithESM: "",
         investigation: "",
+        referredTo: "",
       });
       console.log("inside Referral Letter file if condition");
       setErrors((prev) => ({ ...prev, file1: "File is required" }));
@@ -612,6 +614,7 @@ const UploadDocument = () => {
       esmName: "",
       relationshipWithESM: "",
       investigation: "",
+      referredTo: "",
     });
     console.log("outside after empty Referral Letter file if condition");
     setErrors((prev) => ({ ...prev, file1: "" }));
@@ -653,6 +656,7 @@ const UploadDocument = () => {
         esmName: result?.data?.["ESM Name"] ?? "",
         relationshipWithESM: result?.data?.["Relationship with ESM"] ?? "",
         investigation: result?.data?.["Investigation"] ?? "",
+        referredTo: result?.data?.["Referred To"] ?? "",
 
         // date: "",
         file: file,
@@ -678,9 +682,11 @@ const UploadDocument = () => {
         _id: "",
         patientName: "",
         age: "",
+        gender: "",
         diagnosis: "",
         advice: "",
         treatment_plan: "",
+        medication: [],
         file: null,
       });
       console.log("inside Prescription file if condition");
@@ -696,10 +702,11 @@ const UploadDocument = () => {
       _id: "",
       patientName: "",
       age: "",
+      gender: "",
       diagnosis: "",
       advice: "",
       treatment_plan: "",
-      // medication: [],
+      medication: [],
       file: null,
     });
     console.log("outside after empty Referral Letter file if condition");
@@ -724,10 +731,12 @@ const UploadDocument = () => {
       updateStep4({
         _id: result.ocr_result_id || "",
         age: (result?.data?.["age"] ?? "").match(/\d+/)?.[0] ?? "",
+        gender: result?.data?.["gender"] ?? "",
         patientName: result?.data?.["name"] ?? "",
         diagnosis: result?.data?.["diagnosis"] ?? "",
         advice: result?.data?.["advice"] ?? "",
         treatment_plan: result?.data?.["treatment_plan"] ?? [],
+        medication: result?.data?.["medication"] ?? [],
         file: files.slice(0, 2), // ✅ enforce max 2 files
       });
 
@@ -745,71 +754,6 @@ const UploadDocument = () => {
     }
   };
 
-
-
-  //   const getClaimID = async (file: File | null) => {
-  //     if (!file) {
-  //       setErrors((prev) => ({ ...prev, file1: "File is required" }));
-  //       return;
-  //     }
-
-  //     const formData = new FormData();
-  //     formData.append("file", file);
-
-  //     const token = localStorage.getItem("access_token");
-
-  //     setErrors((prev) => ({ ...prev, file1: "" }));
-  //     try {
-  //       const response = await fetch(
-  //         "https://echs.aretehealth.tech/generate_claim_id",
-  //         {
-  //           method: "POST",
-  //           body: formData,
-  //           headers: token ? { Authorization: `Bearer ${token}` } : {},
-  //         }
-  //       );
-  //       const result = await response.json();
-  // console.log(result);
-  //       if (!response.ok) {
-  //         throw new Error("Failed to get Claim ID");
-  //       }
-
-  //       setErrors((prev) => ({ ...prev, file1: "" }));
-  //       alert(`${"Claim id is"}${result.claim_id}`);
-  //     } catch (error: any) {
-  //       console.error("Upload error:", error);
-  //       setErrors((prev) => ({
-  //         ...prev,
-  //         file1: error.message || "Upload failed",
-  //       }));
-  //       toast.error(
-  //         `Referral Letter Upload failed: ${error.message || "Unknown error"}`
-  //       );
-  //     }
-  //   };
-
-  // const formatDateForInput = (dateStr: string) => {
-  //   console.log(dateStr, " this is date string");
-  //   if (!dateStr) return "";
-
-  //   const parsed = new Date(dateStr);
-  //   console.log(parsed, " this is parsed date");
-  //   if (!isNaN(parsed.getTime())) {
-  //     console.log("this is for yesting purpose ")
-  //     console.log(parsed.toISOString().split("T")[0], " this is parsed date");
-  //     return parsed.toISOString().split("T")[0];
-  //   }
-
-  //   const delimiter = dateStr.includes("/") ? "/" : "-";
-  //   const [day, month, year] = dateStr.split(delimiter);
-  //   console.log(day, month, year, " split date parts"); 
-
-  //   if (day && month && year) {
-  //     return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-  //   }
-
-  //   return "";
-  // };
   const formatDateForInput = (dateStr) => {
     const date = new Date(dateStr);
     const year = date.getFullYear();
@@ -875,8 +819,6 @@ const UploadDocument = () => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchTerm.trim() && searchTerm !== "") {
       fetchSearchResults(searchTerm);
-    } else {
-      setSearchResults(null);
     }
   };
 
@@ -887,15 +829,15 @@ const UploadDocument = () => {
 
         <section className="container max-w-4xl px-4 pb-16 space-y-6">
           <Card className="bg-card shadow-md">
-            <CardHeader>
+            <CardHeader className="px-4 md:px-6">
               <CardTitle className="text-lg font-semibold">
                 Upload Document
               </CardTitle>
             </CardHeader>
 
-            <CardContent className="space-y-6">
+            <CardContent className="p-4 md:p-6 space-y-6">
               {/* Select Type */}
-              <div className="flex items-center gap-4 mb-4">
+              <div className="flex items-center gap-2 md:gap-4 mb-4">
                 <Label className="font-medium">Select Type:</Label>
                 <Button
                   variant={selected === "ECHS" ? "default" : "outline"}
@@ -914,7 +856,7 @@ const UploadDocument = () => {
                   Temporary Slip
                 </Button>
                 {/* Search Field */}
-                <div className="relative ml-auto w-64">
+                <div className="hidden md:block md:relative md:ml-auto md:w-64">
                   <Search
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                     size={18}
@@ -928,6 +870,22 @@ const UploadDocument = () => {
                     onKeyDown={handleKeyDown} // 🔑 listen for Enter key
                   />
                 </div>
+              </div>
+
+              {/* mobile search field  */}
+              <div className="relative w-full md:hidden">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={18}
+                />
+                <Input
+                  type="text"
+                  placeholder="Search..."
+                  className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={handleKeyDown} // 🔑 listen for Enter key
+                />
               </div>
 
               {/* Show correct file upload input */}

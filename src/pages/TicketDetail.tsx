@@ -49,6 +49,13 @@ interface UserHistoryItem {
     id?: string;
     uploaded_at?: string;
   };
+  prescription?: {
+    data?: {
+      [key: string]: any;
+    };
+    id?: string;
+    uploaded_at?: string;
+  };
 }
 
 const TicketDetail = () => {
@@ -89,9 +96,10 @@ const TicketDetail = () => {
     aadhar: true,
     echs: false,
     referral: false,
+    prescription: false,
   });
 
-  const toggleSection = (section: "aadhar" | "echs" | "referral") => {
+  const toggleSection = (section: "aadhar" | "echs" | "referral" | "prescription") => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
@@ -121,22 +129,61 @@ const TicketDetail = () => {
     fetchTicketDetail();
   }, [id]);
 
+  const formatKey = (key: string) =>
+    key
+      .replace(/_/g, " ")
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (str) => str.toUpperCase());
+
   const formatDataField = (key: string, value: any) => {
-    if (typeof value !== "string" && typeof value !== "number") return null;
-    return (
-      <div
-        key={key}
-        className="flex justify-between items-center py-2 border-b border-border/30 last:border-b-0"
-      >
-        <span className="text-sm font-medium text-muted-foreground capitalize">
-          {key
-            .replace(/([A-Z])/g, " $1")
-            .replace(/^./, (str) => str.toUpperCase())}
-          :
-        </span>
-        <span className="font-medium text-foreground">{String(value)}</span>
-      </div>
-    );
+    // if (typeof value !== "string" && typeof value !== "number") return null;
+    if (typeof value === "string" || typeof value === "number") {
+      return (
+        <div
+          key={key}
+          className="flex justify-between items-center py-2 border-b border-border/30 last:border-b-0"
+        >
+          <span className="text-sm font-medium text-muted-foreground capitalize">
+            {key
+              .replace(/([A-Z])/g, " $1")
+              .replace(/^./, (str) => str.toUpperCase())}
+            :
+          </span>
+          <span className="font-medium text-foreground text-sm md:text-[16px] ml-2 md:ml-2">{String(value)}</span>
+        </div>
+      );
+    }
+
+    if (Array.isArray(value)) {
+      if (value.length === 0) return null;
+
+      const flatValues = value
+        .map((item) => {
+          if (typeof item === "string" || typeof item === "number") {
+            return item;
+          }
+          if (typeof item === "object" && item !== null) {
+            return Object.values(item).join(", ");
+          }
+          return null;
+        })
+        .filter(Boolean) 
+        .join(", ");
+
+      return (
+        <div
+          key={key}
+          className="flex justify-between items-center py-2 border-b border-border/30 last:border-b-0"
+        >
+          <span className="text-sm font-medium text-muted-foreground capitalize">
+            {formatKey(key)}:
+          </span>
+          <span className="font-medium text-foreground text-sm md:text-md ml-2 md:ml-2">{flatValues}</span>
+        </div>
+      );
+    }
+
+    return null;
   };
 
   if (!ticket || loading) return null;
@@ -270,6 +317,7 @@ const TicketDetail = () => {
                           ticket.aadhar_card && "Aadhaar",
                           ticket.echs_card_or_temporary_slip && "ECHS",
                           ticket.referral_letter && "Referral",
+                          ticket.prescription && "Prescription",
                         ].filter(Boolean).length
                       }{" "}
                       uploaded
@@ -400,6 +448,48 @@ const TicketDetail = () => {
                         Uploaded:{" "}
                         {new Date(
                           ticket.referral_letter.uploaded_at
+                        ).toLocaleString()}
+                      </p>
+                    )}
+                  </CardContent>
+                )}
+              </Card>
+            )}
+
+            {/* prescription  */}
+            {ticket.prescription?.data && (
+              <Card className="border-0 shadow-sm">
+                <CardHeader className="flex justify-between items-left">
+                  <CardTitle className="flex  items-left gap-3 text-lg">
+                    <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-lg">
+                      <Hospital className="w-5 h-5 text-white" />
+                    </div>
+                    Prescription
+                  </CardTitle>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleSection("prescription")}
+                    >
+                      {openSections.prescription ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
+                </CardHeader>
+                {openSections.prescription && (
+                  <CardContent className="space-y-1">
+                    {Object.entries(ticket.prescription.data).map(([k, v]) =>
+                      formatDataField(k, v)
+                    )}
+                    {ticket.prescription.uploaded_at && (
+                      <p className="pt-3 mt-3 border-t text-xs text-muted-foreground">
+                        Uploaded:{" "}
+                        {new Date(
+                          ticket.prescription.uploaded_at
                         ).toLocaleString()}
                       </p>
                     )}

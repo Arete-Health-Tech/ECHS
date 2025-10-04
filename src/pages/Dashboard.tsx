@@ -68,7 +68,6 @@ const Dashboard = () => {
     recent: 0,
   });
   const navigate = useNavigate();
-  console.log(history," this is hostoery ")
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -84,7 +83,6 @@ const Dashboard = () => {
           }
         );
         const data = await res.json();
-        console.log("Fetched history:", data);
         setHistory(data.history.reverse()); // Show latest first
 
         // Calculate stats
@@ -120,7 +118,7 @@ const Dashboard = () => {
   };
   const getClaimID = (item: UserHistoryItem) => {
     return (
-     
+
       item?.referral_letter?.data?.["Claim ID"] ||
       "NOT PROVIDED"
     );
@@ -281,17 +279,22 @@ const Dashboard = () => {
                           <p className="font-semibold">
                             {getPatientName(item)}
                           </p>
-                        
+
                           <p className="text-sm font-normal text-muted-foreground">
                             ID: {item._id.slice(-8)}
                           </p>
                         </div>
                       </CardTitle>
-                      <p  className="font-medium">
-                          Claim ID: {getClaimID(item)}
-                          </p>
-                      {getStatusBadge(item.matched)}
+                      <p className="font-medium">
+                        Claim ID: {getClaimID(item)}
+                      </p>
+                      <div className="hidden md:block">
+                        {getStatusBadge(item.matched)}
+                      </div>
                     </div>
+                    <div className="md:hidden">
+                        {getStatusBadge(item.matched)}
+                      </div>
                   </CardHeader>
 
                   <CardContent className="pt-0">

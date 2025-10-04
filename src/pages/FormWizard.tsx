@@ -96,18 +96,18 @@ const FormWizard = () => {
     }
     if (selected === "Temporary Slip") {
       // if (!data.step1Temporary.file) newErrors.file = "Document is required";
-      if (!data.step1Temporary.name) newErrors.name = "Name is required";
-      if (!data.step1Temporary.esmName)
-        newErrors.esmName = "ESM Name is required";
-      if (!data.step1Temporary.serviceId)
-        newErrors.serviceId = "Service ID is required";
-      if (!data.step1Temporary.temporaryId)
-        newErrors.temporaryId = "Temporary ID is required";
-      if (!data.step1Temporary.category)
-        newErrors.category = "Category is required";
-      if (!data.step1Temporary.date) newErrors.date = "DOB is required";
-      if (!data.step1Temporary.validUpto)
-        newErrors.validUpto = "Valid Upto date is required";
+      if (!data.step1Temporary.patient_name) newErrors.patient_name = "Name is required";
+      if (!data.step1Temporary.esm)
+        newErrors.esm = "ESM Name is required";
+      if (!data.step1Temporary.form_no)
+        newErrors.form_no = "Form No is required";
+      if (!data.step1Temporary.registration_no)
+        newErrors.registration_no = "Registration No is required";
+      if (!data.step1Temporary.category_of_ward)
+        newErrors.category_of_ward = "Category of Ward is required";
+      if (!data.step1Temporary.dob) newErrors.dob = "DOB is required";
+      if (!data.step1Temporary.valid_upto)
+        newErrors.valid_upto = "Valid Upto date is required";
     }
     if (step === 2) {
       if (!data.step2.aadhaarNumber)
@@ -234,14 +234,14 @@ const FormWizard = () => {
       console.log("Upload successful:", result);
 
       updateStep1Temporary({
-        esmName: result?.data["Patient Name"],
-        name: result?.data["ESM"],
-        relationship: result?.data["Relationship with ESM"],
-        serviceId: result?.data["Form No"],
-        temporaryId: result?.data["Temporary Slip No"],
-        category: result?.data["Category"],
-        date: formatDateForInput(result?.data["DOB"]),
-        validUpto: formatDateForInput(result?.data["Valid Upto"]),
+        esm: result?.data["ESM"],
+        patient_name: result?.data["Patient Name"],
+        relationship_with_esm: result?.data["Relationship With Esm"],
+        form_no: result?.data["Form No"],
+        registration_no: result?.data["Registration No"],
+        category_of_ward: result?.data["Category of Ward"],
+        dob: formatDateForInput(result?.dob["DOB"]),
+        valid_upto: formatDateForInput(result?.data["Valid Upto"]),
         oicStamp: result?.data["OIC Stamp"] === "Found",
         file: file, // Clear the file field after upload
       });
@@ -761,93 +761,93 @@ const FormWizard = () => {
                           {/* Fields */}
                           <div className="grid gap-2 sm:grid-cols-2 mt-4">
                             <div>
-                              <Label htmlFor="name">Patient Name</Label>
+                              <Label htmlFor="patient_name">Patient Name</Label>
                               <Input
-                                id="name"
-                                value={data.step1Temporary?.name}
+                                id="patient_name"
+                                value={data.step1Temporary?.patient_name}
                                 onChange={(e) =>
-                                  updateStep1Temporary({ name: e.target.value })
+                                  updateStep1Temporary({ patient_name: e.target.value })
                                 }
                               />
-                              {errors.name && (
+                              {errors.patient_name && (
                                 <p className="text-destructive text-sm mt-1">
-                                  {errors.name}
+                                  {errors.patient_name}
                                 </p>
                               )}
                             </div>
 
                             <div>
-                              <Label htmlFor="esmName">ESM Name</Label>
+                              <Label htmlFor="esm">ESM Name</Label>
                               <Input
-                                id="esmName"
-                                value={data.step1Temporary?.esmName}
+                                id="esm"
+                                value={data.step1Temporary?.esm}
                                 onChange={(e) =>
                                   updateStep1Temporary({
-                                    esmName: e.target.value,
+                                    esm: e.target.value,
                                   })
                                 }
                               />
-                              {errors.esmName && (
+                              {errors.esm && (
                                 <p className="text-destructive text-sm mt-1">
-                                  {errors.esmName}
+                                  {errors.esm}
                                 </p>
                               )}
                             </div>
                           </div>
 
                           <div>
-                            <Label htmlFor="relationship">
+                            <Label htmlFor="relationship_with_esm">
                               Relationship with ESM
                             </Label>
                             <Input
-                              id="relationship"
-                              value={data.step1Temporary?.relationship}
+                              id="relationship_with_esm"
+                              value={data.step1Temporary?.relationship_with_esm}
                               onChange={(e) =>
                                 updateStep1Temporary({
-                                  relationship: e.target.value,
+                                  relationship_with_esm: e.target.value,
                                 })
                               }
                             />
-                            {errors.relationship && (
+                            {errors.relationship_with_esm && (
                               <p className="text-destructive text-sm mt-1">
-                                {errors.relationship}
+                                {errors.relationship_with_esm}
                               </p>
                             )}
                           </div>
 
                           <div className="grid gap-2 sm:grid-cols-2">
                             <div>
-                              <Label htmlFor="serviceId">Service No.</Label>
+                              <Label htmlFor="form_no">Form No.</Label>
                               <Input
-                                id="serviceId"
-                                value={data.step1Temporary?.serviceId}
+                                id="form_no"
+                                value={data.step1Temporary?.form_no}
                                 onChange={(e) =>
                                   updateStep1Temporary({
-                                    serviceId: e.target.value,
+                                    form_no: e.target.value,
                                   })
                                 }
                               />
-                              {errors.serviceId && (
+                              {errors.form_no && (
                                 <p className="text-destructive text-sm mt-1">
-                                  {errors.serviceId}
+                                  {errors.form_no}
                                 </p>
                               )}
                             </div>
 
                             <div>
-                              <Label htmlFor="temporaryId">Temporary ID</Label>
+                              <Label htmlFor="registration_no">Temporary ID</Label>
                               <Input
-                                id="temporaryId"
-                                value={data.step1Temporary?.temporaryId}
+                                id="registration_no"
+                                value={data.step1Temporary?.registration_no}
                                 onChange={(e) =>
                                   updateStep1Temporary({
-                                    temporaryId: e.target.value,
+                                    registration_no: e.target.value,
                                   })
                                 }
                               />
-                              {errors.temporaryId && (
+                              {errors.registration_no && (
                                 <p className="text-destructive text-sm mt-1">
-                                  {errors.temporaryId}
+                                  {errors.registration_no}
                                 </p>
                               )}
                             </div>
@@ -855,56 +855,56 @@ const FormWizard = () => {
 
                           <div className="grid gap-2 sm:grid-cols-2">
                             <div>
-                              <Label htmlFor="category">Category</Label>
+                              <Label htmlFor="category_of_ward">Category</Label>
                               <Input
-                                id="category"
-                                value={data.step1Temporary?.category}
+                                id="category_of_ward"
+                                value={data.step1Temporary?.category_of_ward}
                                 onChange={(e) =>
                                   updateStep1Temporary({
-                                    category: e.target.value,
+                                    category_of_ward: e.target.value,
                                   })
                                 }
                               />
-                              {errors.category && (
+                              {errors.category_of_ward && (
                                 <p className="text-destructive text-sm mt-1">
-                                  {errors.category}
+                                  {errors.category_of_ward}
                                 </p>
                               )}
                             </div>
 
                             <div>
-                              <Label htmlFor="date">DOB</Label>
+                              <Label htmlFor="dob">DOB</Label>
                               <Input
-                                id="date"
+                                id="dob"
                                 type="date"
-                                value={data.step1Temporary?.date}
+                                value={data.step1Temporary?.dob}
                                 onChange={(e) =>
-                                  updateStep1Temporary({ date: e.target.value })
+                                  updateStep1Temporary({ dob: e.target.value })
                                 }
                               />
-                              {errors.date && (
+                              {errors.dob && (
                                 <p className="text-destructive text-sm mt-1">
-                                  {errors.date}
+                                  {errors.dob}
                                 </p>
                               )}
                             </div>
                           </div>
 
                           <div>
-                            <Label htmlFor="validUpto">Valid Upto</Label>
+                            <Label htmlFor="valid-Upto">Valid Upto</Label>
                             <Input
-                              id="validUpto"
+                              id="valid_upto"
                               type="date"
-                              value={data.step1Temporary?.validUpto}
+                              value={data.step1Temporary?.valid_upto}
                               onChange={(e) =>
                                 updateStep1Temporary({
-                                  validUpto: e.target.value,
+                                  valid_upto: e.target.value,
                                 })
                               }
                             />
-                            {errors.validUpto && (
+                            {errors.valid_upto && (
                               <p className="text-destructive text-sm mt-1">
-                                {errors.validUpto}
+                                {errors.valid_upto}
                               </p>
                             )}
                           </div>

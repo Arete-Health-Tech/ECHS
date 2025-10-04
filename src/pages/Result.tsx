@@ -22,7 +22,7 @@ interface LocationState {
   data: FormDataAll;
   matched: boolean;
 }
- 
+
 const Result = () => {
   const [selected, setSelected] = useState<"ECHS" | "Temporary Slip">("ECHS");
   const [loadingAgain, setLoadingAgain] = useState(false);
@@ -34,6 +34,7 @@ const Result = () => {
     step4: false,
   });
   const [loading, setLoading] = useState(false);
+  const [loadingFollowUp, setLoadingFollowUp] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [claimId, setClaimId] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<string>("");
@@ -82,9 +83,14 @@ const Result = () => {
       if (step === "step4") updateStep4({ [key]: value } as any);
     };
 
-    
+
     return Object.entries(obj).map(([key, value]) => {
       if (["file", "photo", "_id"].includes(key)) return null;
+
+      const displayValue =
+        key === "medication" && Array.isArray(value)
+          ? value.map((m: any) => `${m.name}, ${m.dosage}`).join(", ")
+          : value ?? "";
 
       return (
         <div
@@ -92,20 +98,20 @@ const Result = () => {
           className="flex flex-col md:flex-row md:items-center justify-between border-b py-3 gap-2 text-sm"
         >
           <label className="font-medium capitalize text-xs md:text-sm md:w-1/3">
-          {key === "date" ? "date":key === "serviceNo" ?"Service No":key ==="esm"?"ESM":key==="dob"?"DOB":key==="dom"?"DOM":key ==="nameOnCard"?"Name on Aadhaar Card":key ==="patientName"?"Name of Patient":key ==="pdSec"?"Polyclinic Name":key ==="doi"?"Date of Issue":key ==="noOfSessionsAllowed"?"No of Sessions Allowed":key ==="patientType"?"Patient Type":key ==="contactNo"?"ESM Contact Number":key ==="validityUpto"?"Valid Upto":key ==="referralNo"?"Referral No":key ==="relationshipWithESM"?"Relationship with ESM":key ==="claimId"?"Claim ID":key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:
+            {key === "date" ? "date" : key === "serviceNo" ? "Service No" : key === "esm" ? "ESM" :  key === "patient_name" ? "Patient Name" : key === "dob" ? "DOB" : key === "dom" ? "DOM" : key === "nameOnCard" ? "Name on Aadhaar Card" : key === "patientName" ? "Name of Patient" : key === "pdSec" ? "Polyclinic Remarks" : key === "doi" ? "Date of Issue" : key === "noOfSessionsAllowed" ? "No of Sessions Allowed" : key === "patientType" ? "Patient Type" : key === "contactNo" ? "ESM Contact Number" : key === "validityUpto" ? "Valid Upto": key === "valid_upto" ? "Valid Upto" : key === "relationship_with_esm" ? "Relationship With Esm" : key === "registration_no" ? "Registration No" : key === "category_of_ward" ? "Category of Ward" : key === "form_no" ? "Form No"  : key === "referralNo" ? "Referral No" : key === "referredTo" ? "Referred To" : key === "relationshipWithESM" ? "Relationship with ESM" : key === "claimId" ? "Claim ID" : key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:
           </label>
-        
+
           <input
             type={
               key.toLowerCase().includes("date") || key === "dob" || key === "dom"
                 ? "date"
                 : "text"
             }
-            value={value ?? ""}
+            value={displayValue}
             onChange={(e) => updateField(key, e.target.value)}
             className="flex-1 border rounded-md px-2 py-1 text-xs md:text-sm focus:ring-2 focus:ring-primary focus:outline-none"
           />
-          
+
         </div>
       );
     });
@@ -140,23 +146,22 @@ const Result = () => {
   const comparisons = useMemo(() => {
     if (!data) return null;
 
-//Name for prescription 
+    //Name for prescription 
 
 
-    const step1Name = data.step1?.name || data.step1Temporary?.name;
+    const step1Name = data.step1?.name || data.step1Temporary?.patient_name;
     const step2Name = data.step2?.nameOnCard;
     const step3Name = data.step3?.patientName;
-  const step4Name = data.step4?.patientName;
-   
+    const step4Name = data.step4?.patientName;
+
     // const step4Surgery = data.step4?.surgeryName;
 
 
-    const step1Gender =
-      data.step1?.category || data.step1Temporary?.category || "";
+    // const step1Gender =
+    //   data.step1?.category || data.step1Temporary?.category || "";
     const step2Gender = data.step2?.gender || "";
     const step3Gender = data.step3?.gender || "";
-    // const step4Gender = prescriptionGender || "";
-    
+    const step4Gender = data.step4.gender || "";
 
     const step1Age = data.step1?.dob
       ? calculateAge(data.step1.dob)
@@ -168,36 +173,79 @@ const Result = () => {
     const step3Age = data.step3?.age ? Number(data.step3.age) : undefined;
     const step4Age = data.step4?.age?.match(/\d+/)?.[0] ?? "";
 
-const step1Surgery=  "";
-const step2Surgery=  "";
-const step3Surgery=  data.step3?.admission || "";     
-const step4Surgery=   data.step4.advice|| "";
-    
-    // const step1.validity = data.step1.?.validUpto || "";
+    const step1Surgery = "";
+    const step2Surgery = "";
+    const step3Surgery = data.step3?.admission || "";
+    const step4Surgery = data.step4.advice || "";
 
-    const isNameMatched =
-      step1Name &&
-      step3Name &&
-      // step1Name.trim().toLowerCase() === step2Name.trim().toLowerCase() &&
-      step1Name.trim().toLowerCase() === step3Name.trim().toLowerCase();
+    const isNameMatched = (() => {
+      const names = [step1Name, step3Name]
+        .filter((n) => n !== undefined && n !== null && n.trim() !== "")
+        .map((n) => n.trim().toLowerCase());
+    
+      if (names.length === 0) return false; // both empty
+      if (names.length === 1) return true;  // only one filled → nothing to compare
+    
+      return names[0] === names[1]; // both filled → must match
+    })();
+    
 
     setMatch(Boolean(isNameMatched));
 
-    const isGenderMatched =
-      step1Gender &&
-      step2Gender &&
-      step3Gender &&
-      step1Gender.trim().toLowerCase() === step2Gender.trim().toLowerCase() &&
-      step1Gender.trim().toLowerCase() === step3Gender.trim().toLowerCase();
+    // const isGenderMatched =
+    //   step1Gender &&
+    //   step2Gender &&
+    //   step3Gender &&
+    //   step1Gender.trim().toLowerCase() === step2Gender.trim().toLowerCase() &&
+    //   step1Gender.trim().toLowerCase() === step3Gender.trim().toLowerCase();
+    const isGenderMatched = (() => {
+      // helper to normalize gender values
+      const normalize = (g: string) => {
+        const val = g.trim().toLowerCase();
+        if (val === "m" || val === "male") return "male";
+        if (val === "f" || val === "female") return "female";
+        return val; // fallback in case of unexpected values
+      };
+    
+      const genders = [step2Gender, step3Gender, step4Gender]
+        .filter(Boolean)
+        .map(normalize);
+    
+      if (genders.length === 0) return false; // nothing provided → false
+      if (genders.length === 1) return true;  // only one → true
+      return genders.every((g) => g === genders[0]); // all must match after normalization
+    })();
+    
 
-      const isAgeMatched =
-      step1Age !== undefined &&
-      // step2Age !== undefined &&
-      step3Age !== undefined &&
-      // Math.floor(Number(step1Age)) === Math.floor(Number(step2Age)) &&
-      Math.floor(Number(step1Age)) === Math.floor(Number(step3Age));
+    // const isAgeMatched =
+    //   step1Age !== undefined &&
+    //   // step2Age !== undefined &&
+    //   step3Age !== undefined &&
+    //   // Math.floor(Number(step1Age)) === Math.floor(Number(step2Age)) &&
+    //   Math.floor(Number(step1Age)) === Math.floor(Number(step3Age));
+    const isAgeMatched = (() => {
+      const ages = [step1Age, step3Age].filter(
+        (a) => a !== undefined && a !== null && String(a).trim() !== ""
+      );      
+    
+      if (ages.length === 0) return false; // both empty
+      if (ages.length === 1) return true;  // only one filled → nothing to compare
+    
+      return Math.floor(Number(step1Age)) === Math.floor(Number(step3Age));
+    })();
+    
 
-      const isSurgeryMatched =  step3Surgery && step4Surgery && step3Surgery.trim().toLowerCase() === step4Surgery.trim().toLowerCase();
+    // const isSurgeryMatched = step3Surgery && step4Surgery && step3Surgery.trim().toLowerCase() === step4Surgery.trim().toLowerCase();
+    const isSurgeryMatched = (() => {
+      const s3 = step3Surgery?.trim().toLowerCase() || "";
+      const s4 = step4Surgery?.trim().toLowerCase() || "";
+    
+      if (!s3 && !s4) return false; // both empty → false
+      if (!s3 || !s4) return true;  // only one filled → true
+    
+      return s3 === s4; // both filled → must match
+    })();
+    
 
     return {
       step4Name,
@@ -206,9 +254,10 @@ const step4Surgery=   data.step4.advice|| "";
       step1Name,
       step2Name,
       step3Name,
-      step1Gender,
+      // step1Gender,
       step2Gender,
       step3Gender,
+      step4Gender,
       step1Age,
       step2Age,
       step3Age,
@@ -249,7 +298,6 @@ const step4Surgery=   data.step4.advice|| "";
     }
   };
   const allApproved = Object.values(approvals).every((val) => val === true);
-  // console.log(allApproved,"thjis is call ");
 
   const getClaimID = async (file: File | null) => {
     if (!file) {
@@ -287,15 +335,10 @@ const step4Surgery=   data.step4.advice|| "";
     }
   };
 
-
   const handleClaimID = async () => {
-    console.log("this is not ")
-    console.log(data?.step3?.file,"this is call  zsasasasasa")
     if (data?.step3?.file) {
       setLoading(true);
-      console.log(data?.step3?.file,"this is call  zsasasasasa")
       try {
-        console.log(data.step3.file," thi is 2");
         await getClaimID(data.step3.file);
       } finally {
         setLoading(false);
@@ -305,6 +348,54 @@ const step4Surgery=   data.step4.advice|| "";
     }
   };
 
+  const getClaimIDFollowup = async (file: File | null) => {
+    if (!file) {
+      setErrors((prev) => ({ ...prev, file1: "File is required" }));
+      return;
+    }
+    const formData = new FormData();
+    formData.append("file", file);
+  
+    const token = localStorage.getItem("access_token");
+  
+    setErrors((prev) => ({ ...prev, file1: "" }));
+    try {
+      const response = await fetch("https://echs.aretehealth.tech/generate_claim_id_followup", {
+        method: "POST",
+        body: formData,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error("Failed to get Repeat Claim ID");
+  
+      // Store old + new claim id
+      setClaimId(
+        result.new_claim_id
+          ? `New: ${result.new_claim_id} | Old: ${result.claim_id ?? "N/A"}`
+          : result.message
+      );
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      setErrors((prev) => ({
+        ...prev,
+        file1: error.message || "Upload failed",
+      }));
+      toast.error(`Repeat Claim ID generation failed: ${error.message || "Unknown error"}`);
+    }
+  };
+  
+  const handleClaimIDFollowup = async () => {
+    if (data?.step3?.file) {
+      setLoadingFollowUp(true);
+      try {
+        await getClaimIDFollowup(data.step3.file);
+      } finally {
+        setLoadingFollowUp(false);
+      }
+    } else {
+      setErrors((prev) => ({ ...prev, file1: "File is required" }));
+    }
+  };
 
   const callForHistory = async () => {
     document.title = "Result | ECHS";
@@ -328,48 +419,28 @@ const step4Surgery=   data.step4.advice|| "";
 
   // helper function to format date
   const formatDate = (isoDate: string) => {
-    console.log(isoDate," tjis is isodat")
     if (!isoDate) return "";
     const date = new Date(isoDate);
-    console.log(date,"date format")
     return date.toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     });
   };
-// console.log(data.step1.date,"this is date")
-  // const formatDateForInput = (dateStr: string) => {
-  //   if (!dateStr) return "";
 
-  //   const parsed = new Date(dateStr);
-  //   if (!isNaN(parsed.getTime())) {
-  //     return parsed.toISOString().split("T")[0];
-  //   }
-
-  //   const delimiter = dateStr.includes("/") ? "/" : "-";
-  //   const [day, month, year] = dateStr.split(delimiter);
-
-  //   if (day && month && year) {
-  //     return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-  //   }
-
-  //   return "";
-  // };
   const formatDateForInput = (dateStr) => {
     const date = new Date(dateStr);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    console.log(year,month,day, " this is date string");
     return `${year}-${month}-${day}`;
   };
 
   const transformStep1 = (step1: {
     name: string;
     esm: string;
-dom: string;
-cardNo: string;
+    dom: string;
+    cardNo: string;
     relationship: string;
     serviceNo: string;
     dob: string;
@@ -388,14 +459,14 @@ cardNo: string;
 
   function transformStep1Temporary(step1Temporary: Step1_Temporary) {
     return {
-      "Patient Name": step1Temporary.name || "",
-      "ESM": step1Temporary.esmName || "",
-      "Relationship with ESM": step1Temporary.relationship || "",
-      "Form No": step1Temporary.serviceId || "",
-      "Temporary Slip No": step1Temporary.temporaryId || "",
-      "Category": step1Temporary.category || "",
-      "DOB": step1Temporary.date || "",
-      "Valid Upto": step1Temporary.validUpto || "",
+      "Patient Name": step1Temporary.patient_name || "",
+      "ESM": step1Temporary.esm || "",
+      "Relationship With ESM": step1Temporary.relationship_with_esm || "",
+      "Form No": step1Temporary.form_no || "",
+      "Registration No": step1Temporary.registration_no || "",
+      "Category of Ward": step1Temporary.category_of_ward || "",
+      "DOB": step1Temporary.dob || "",
+      "Valid Upto": step1Temporary.valid_upto || "",
       "OIC Stamp": step1Temporary.oicStamp ? "Found" : "Not Found",
     };
   }
@@ -438,34 +509,33 @@ cardNo: string;
       "Consultation For": step3.consultationFor || "",
       "Polyclinic Remarks": step3.pdSec || "",
       "Claim ID": step3.claimId || "Not Found",
+      "Referred To": step3.referredTo || "",
     };
   }
   function transformStep4(step4: Step4) {
     return {
-      "name": step4.patientName|| "",
+      "name": step4.patientName || "",
       "age": step4.age || "",
       "diagnosis": step4.diagnosis || "",
       "advice": step4.advice || "",
-     
     };
   }
-  console.log({ data })
 
   const handleValidateAgain = async () => {
     try {
       setLoadingAgain(true);
       const token = localStorage.getItem("access_token");
-      let echs_card_file = data.step1.file;
-      let temporary_slip_file = data.step1Temporary.file;
-      let aadhar_card_file = data.step2.file;
-      let referral_letter_file = data.step3.file;
-      let prescription_file = data.step4.file;
+      const echs_card_file = data.step1.file;
+      const temporary_slip_file = data.step1Temporary.file;
+      const aadhar_card_file = data.step2.file;
+      const referral_letter_file = data.step3.file;
+      const prescription_file = data.step4.file;
       const payload: Record<string, any> = {};
       payload.echs_card = transformStep1(data.step1);
       payload.temporary_slip = transformStep1Temporary(data.step1Temporary);
       payload.aadhar_card = transformStep2(data.step2)
       payload.referral_letter = transformStep3(data.step3);
-      payload.prescription =  transformStep4(data.step4);
+      payload.prescription = transformStep4(data.step4);
       const res = await fetch(`https://echs.aretehealth.tech/request_update/${requestId}`, {
         method: "PUT",
         headers: {
@@ -503,7 +573,6 @@ cardNo: string;
       }
 
       const result = await res.json();
-
       // ⚡️ Update Zustand store with new values from response
       if (result.step1) updateStep1({
         _id: result.ocr_result_id || "",
@@ -514,19 +583,18 @@ cardNo: string;
         relationship: result?.data["Relationship with ESM"],
         dom: formatDateForInput(result?.data["DOM"]),
         serviceNo: result?.data["Service No"],
-        // serviceIdPhoto: file, // Assuming the uploaded file is the service ID photo
         file: echs_card_file, // Clear the file field after upload
       });
       if (result.step1Temporary) updateStep1Temporary({
         _id: result.ocr_result_id || "",
-        esmName: result?.data["Patient Name"],
-        name: result?.data["ESM"],
-        relationship: result?.data["Relationship with ESM"],
-        serviceId: result?.data["Form No"],
-        temporaryId: result?.data["Temporary Slip No"],
-        category: result?.data["Category"],
-        date: formatDateForInput(result?.data["DOB"]),
-        validUpto: formatDateForInput(result?.data["Valid Upto"]),
+        esm: result?.data["ESM"],
+        patient_name: result?.data["Patient Name"],
+        relationship_with_esm: result?.data["Relationship With Esm"],
+        form_no: result?.data["Form No"],
+        registration_no: result?.data["Registration No"],
+        category_of_ward: result?.data["Category of Ward"],
+        dob: formatDateForInput(result?.data["DOB"]),
+        valid_upto: formatDateForInput(result?.data["Valid Upto"]),
         oicStamp: result?.data["OIC Stamp"] === "Found",
         file: temporary_slip_file, // Clear the file field after upload
       });
@@ -559,6 +627,7 @@ cardNo: string;
         relationshipWithESM: result?.data["Relationship with ESM"],
         investigation: result?.data["Investigation"],
         file: referral_letter_file, // Clear the file field after upload
+        referredTo: result?.data["Referred To"],
       });
       if (result.step4) updateStep4({
         _id: result.ocr_result_id || "",
@@ -567,7 +636,7 @@ cardNo: string;
         diagnosis: result?.data["diagnosis"],
         advice: result?.data["advice"],
         file: prescription_file, // Clear the file field after upload
-        
+
       });
       callForHistory();
       toast.success("Validation completed");
@@ -593,15 +662,21 @@ cardNo: string;
     if (comparisons.isAgeMatched) {
       setApprovals((prev) => ({ ...prev, age: true }));
     }
+    if (comparisons.isGenderMatched === true) {
+      setApprovals((prev) => ({ ...prev, gender: true }));
+    }
+    if (comparisons.isSurgeryMatched === true) {
+      setApprovals((prev) => ({ ...prev, surgery: true }));
+    }
   }, [comparisons]);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-muted">
       <Navbar />
 
-      <div className="container flex flex-row justify-between">
+      <div className="container flex flex-row justify-between items-center">
         <div
-          className="border rounded-sm bg-muted/50 backdrop-blur-md p-4 mb-6 text-center cursor-pointer hover:bg-muted/70 transition-colors"
+          className="border rounded-sm bg-muted/50 backdrop-blur-md p-4 md:mb-6 text-center cursor-pointer hover:bg-muted/70 transition-colors"
           onClick={() => {
             useFormStore.getState().reset();
             navigate("/form");
@@ -620,14 +695,14 @@ cardNo: string;
             };
             data.step1Temporary = {
               _id: "",
-              name: "",
-              esmName: "",
-              relationship: "",
-              serviceId: "",
-              temporaryId: "",
-              category: "",
-              date: "",
-              validUpto: "",
+              patient_name: "",
+              esm: "",
+              relationship_with_esm: "",
+              form_no: "",
+              registration_no: "",
+              category_of_ward: "",
+              dob: "",
+              valid_upto: "",
               file: null,
               oicStamp: false,
             };
@@ -659,40 +734,63 @@ cardNo: string;
               relationshipWithESM: "",
               investigation: "",
               file: null,
+              referredTo: "",
             };
             data.step4 = {
               _id: "",
-              patientName:"",
+              patientName: "",
               age: "",
+              gender: "",
               diagnosis: "",
               advice: "",
               treatment_plan: "",
-              // medication: [],
+              medication: [],
               file: null,
             };
           }}
         >
           New Submission
         </div>
-        <Button
-          onClick={handleClaimID}
-          disabled={loading || !allApproved}
-          className={`gap-2 transition-colors ${loading
-            ? "bg-primary text-white hover:bg-primary/90"
-            : allApproved
-              ? "bg-green-600 text-white border border-green-600 hover:bg-green-700"
-              : "bg-gray-300 text-gray-600 cursor-not-allowed"
-            }`}
-        >
-          {loading ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Generating...
-            </>
-          ) : (
-            "Generate Claim ID"
-          )}
-        </Button>
+        <div className="flex flex-col md:flex-row gap-2">
+          <Button
+            onClick={handleClaimIDFollowup}
+            disabled={loadingFollowUp || !allApproved}
+            className={`gap-2 transition-colors ${loadingFollowUp
+              ? "bg-primary text-white hover:bg-primary/90"
+              : allApproved
+                ? "bg-green-600 text-white border border-green-600 hover:bg-green-700"
+                : "bg-gray-300 text-gray-600 cursor-not-allowed"
+              }`}
+          >
+            {loadingFollowUp ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Generating...
+              </>
+            ) : (
+              "Generate Claim ID (Repeat)"
+            )}
+          </Button>
+          <Button
+            onClick={handleClaimID}
+            disabled={loading || !allApproved}
+            className={`gap-2 transition-colors ${loading
+              ? "bg-primary text-white hover:bg-primary/90"
+              : allApproved
+                ? "bg-green-600 text-white border border-green-600 hover:bg-green-700"
+                : "bg-gray-300 text-gray-600 cursor-not-allowed"
+              }`}
+          >
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Generating...
+              </>
+            ) : (
+              "Generate Claim ID (New)"
+            )}
+          </Button>
+        </div>
         {/* <Button
           onClick={handleValidateAgain}
           className="gap-2 bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 transition-opacity"
@@ -747,7 +845,7 @@ cardNo: string;
                       Field
                     </th>
                     <th className="text-left p-2 border text-[10px] md:text-[14px]">
-                      ECHS Card
+                      ECHS Card / Temporary Slip
                     </th>
                     <th className="text-left p-2 border text-[10px] md:text-[14px]">
                       Aadhaar Card
@@ -782,7 +880,7 @@ cardNo: string;
                       {comparisons.step3Name || "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      {comparisons.step4Name|| "-"}
+                      {comparisons.step4Name || "-"}
                     </td>
                     <td className="p-2 border  text-[10px] md:text-[14px]">
                       {comparisons.isNameMatched ? (
@@ -792,13 +890,13 @@ cardNo: string;
                       )}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px] text-center">
-                    <button
-  onClick={() => toggleApproval("name")}
-  className="px-2 py-1 border rounded hover:bg-gray-100"
->
-  {approvals.name ? "✅" : "❌"}
-</button>
-</td>
+                      <button
+                        onClick={() => toggleApproval("name")}
+                        className="px-2 py-1 border rounded hover:bg-gray-100"
+                      >
+                        {approvals.name ? "✅" : "❌"}
+                      </button>
+                    </td>
                   </tr>
 
                   {/* Gender */}
@@ -807,7 +905,7 @@ cardNo: string;
                       Gender
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      {comparisons.step1Gender || "-"}
+                      {"-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
                       {comparisons.step2Gender || "-"}
@@ -816,7 +914,7 @@ cardNo: string;
                       {comparisons.step3Gender || "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      { "-"}
+                      {comparisons.step4Gender}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
                       {data.step3.gender ? (
@@ -850,7 +948,7 @@ cardNo: string;
                       {comparisons.step3Age ?? "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      {comparisons.step4Age||"-"}
+                      {comparisons.step4Age || "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
                       {comparisons.isAgeMatched ? (
@@ -860,12 +958,12 @@ cardNo: string;
                       )}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px] text-center">
-                    <button
-    onClick={() => toggleApproval("age")}
-    className="px-2 py-1 border rounded hover:bg-gray-100"
-  >
-    {approvals.age ? "✅" : "❌"}
-  </button>
+                      <button
+                        onClick={() => toggleApproval("age")}
+                        className="px-2 py-1 border rounded hover:bg-gray-100"
+                      >
+                        {approvals.age ? "✅" : "❌"}
+                      </button>
                     </td>
                   </tr>
                   <tr>
@@ -873,16 +971,16 @@ cardNo: string;
                       Surgery Name
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      { "-"}
+                      {"-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
                       {"-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      {comparisons.step3Surgery?? "-"}
+                      {comparisons.step3Surgery ?? "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      {comparisons.step4Surgery||"-"}
+                      {comparisons.step4Surgery || "-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
                       {comparisons.isSurgeryMatched ? (
@@ -906,42 +1004,45 @@ cardNo: string;
           )}
         </Card>
         <div
-          className="border border-primary rounded-sm bg-muted/50 backdrop-blur-md p-4 mb-6 text-center cursor-pointer hover:bg-muted/70 transition-colors"
+          className="border border-primary rounded-sm bg-muted/50 backdrop-blur-md p-4 mb-4 text-center cursor-pointer hover:bg-muted/70 transition-colors"
         >
           Validity Upto :{" "}
           {(() => {
-  const validity = data.step3?.validityUpto;
-  console.log(validity, "validity");
+            const validity = data.step3?.validityUpto;
 
-  if (!validity) return "N/A";
+            if (!validity) return "N/A";
 
-  // Parse DD-MM-YYYY
-  const [day, month, year] = validity.split("-").map(Number);
-  const validityDate = new Date(year, month - 1, day); // month is 0-based
-  console.log(validityDate, "validityDate");
+            // Parse DD-MM-YYYY
+            const [day, month, year] = validity.split("-").map(Number);
+            const validityDate = new Date(year, month - 1, day); // month is 0-based
 
-  const today = new Date();
-  console.log(today, "today");
-  today.setHours(0, 0, 0, 0);
-  validityDate.setHours(0, 0, 0, 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            validityDate.setHours(0, 0, 0, 0);
 
-  // Format back to DD-MM-YYYY
-  const formattedDate = `${day.toString().padStart(2, "0")}-${month
-    .toString()
-    .padStart(2, "0")}-${year}`;
+            // Format back to DD-MM-YYYY
+            const formattedDate = `${day.toString().padStart(2, "0")}-${month
+              .toString()
+              .padStart(2, "0")}-${year}`;
 
-  return validityDate < today ? (
-    <span>
-      {formattedDate} <b>(Invalid Date)</b>
-    </span>
-  ) : (
-    formattedDate
-  );
-})()}
+            return validityDate < today ? (
+              <span>
+                {formattedDate} <b>(Invalid Date)</b>
+              </span>
+            ) : (
+              formattedDate
+            );
+          })()}
         </div>
+
+          <div
+            className="border border-primary rounded-sm bg-muted/50 backdrop-blur-md p-4 mb-6 text-center cursor-pointer hover:bg-muted/70 transition-colors"
+          >
+            Referred To :{" "} {data?.step3?.referredTo}
+          </div>
       </section>
-      
-     
+
+
       {/* Step Sections */}
       <section className="container max-w-5xl pb-20 space-y-6">
         <Card className={isEmptyObject(data.step1) ? "opacity-50 pointer-events-none" : ""}>
@@ -957,7 +1058,7 @@ cardNo: string;
           )}
         </Card>
 
-        {!isEmptyObject(data.step1Temporary) && data.step1Temporary.name && (
+        {!isEmptyObject(data.step1Temporary) && data.step1Temporary.patient_name && (
           <Card>
             <CardHeader
               className="flex justify-between cursor-pointer"
