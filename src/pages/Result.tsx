@@ -98,7 +98,7 @@ const Result = () => {
           className="flex flex-col md:flex-row md:items-center justify-between border-b py-3 gap-2 text-sm"
         >
           <label className="font-medium capitalize text-xs md:text-sm md:w-1/3">
-            {key === "date" ? "date" : key === "serviceNo" ? "Service No" : key === "esm" ? "ESM" :  key === "patient_name" ? "Patient Name" : key === "dob" ? "DOB" : key === "dom" ? "DOM" : key === "nameOnCard" ? "Name on Aadhaar Card" : key === "patientName" ? "Name of Patient" : key === "pdSec" ? "Polyclinic Remarks" : key === "doi" ? "Date of Issue" : key === "noOfSessionsAllowed" ? "No of Sessions Allowed" : key === "patientType" ? "Patient Type" : key === "contactNo" ? "ESM Contact Number" : key === "validityUpto" ? "Valid Upto": key === "valid_upto" ? "Valid Upto" : key === "relationship_with_esm" ? "Relationship With Esm" : key === "registration_no" ? "Registration No" : key === "category_of_ward" ? "Category of Ward" : key === "form_no" ? "Form No"  : key === "referralNo" ? "Referral No" : key === "referredTo" ? "Referred To" : key === "relationshipWithESM" ? "Relationship with ESM" : key === "claimId" ? "Claim ID" : key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:
+            {key === "date" ? "date" : key === "serviceNo" ? "Service No" : key === "esm" ? "ESM" : key === "patient_name" ? "Patient Name" : key === "dob" ? "DOB" : key === "dom" ? "DOM" : key === "nameOnCard" ? "Name on Aadhaar Card" : key === "patientName" ? "Name of Patient" : key === "pdSec" ? "Polyclinic Remarks" : key === "doi" ? "Date of Issue" : key === "noOfSessionsAllowed" ? "No of Sessions Allowed" : key === "patientType" ? "Patient Type" : key === "contactNo" ? "ESM Contact Number" : key === "validityUpto" ? "Valid Upto" : key === "valid_upto" ? "Valid Upto" : key === "relationship_with_esm" ? "Relationship With Esm" : key === "registration_no" ? "Registration No" : key === "category_of_ward" ? "Category of Ward" : key === "form_no" ? "Form No" : key === "referralNo" ? "Referral No" : key === "referredTo" ? "Referred To" : key === "relationshipWithESM" ? "Relationship with ESM" : key === "claimId" ? "Claim ID" : key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:
           </label>
 
           <input
@@ -182,13 +182,13 @@ const Result = () => {
       const names = [step1Name, step3Name]
         .filter((n) => n !== undefined && n !== null && n.trim() !== "")
         .map((n) => n.trim().toLowerCase());
-    
+
       if (names.length === 0) return false; // both empty
       if (names.length === 1) return true;  // only one filled → nothing to compare
-    
+
       return names[0] === names[1]; // both filled → must match
     })();
-    
+
 
     setMatch(Boolean(isNameMatched));
 
@@ -206,16 +206,16 @@ const Result = () => {
         if (val === "f" || val === "female") return "female";
         return val; // fallback in case of unexpected values
       };
-    
+
       const genders = [step2Gender, step3Gender, step4Gender]
         .filter(Boolean)
         .map(normalize);
-    
+
       if (genders.length === 0) return false; // nothing provided → false
       if (genders.length === 1) return true;  // only one → true
       return genders.every((g) => g === genders[0]); // all must match after normalization
     })();
-    
+
 
     // const isAgeMatched =
     //   step1Age !== undefined &&
@@ -226,26 +226,26 @@ const Result = () => {
     const isAgeMatched = (() => {
       const ages = [step1Age, step3Age].filter(
         (a) => a !== undefined && a !== null && String(a).trim() !== ""
-      );      
-    
+      );
+
       if (ages.length === 0) return false; // both empty
       if (ages.length === 1) return true;  // only one filled → nothing to compare
-    
+
       return Math.floor(Number(step1Age)) === Math.floor(Number(step3Age));
     })();
-    
+
 
     // const isSurgeryMatched = step3Surgery && step4Surgery && step3Surgery.trim().toLowerCase() === step4Surgery.trim().toLowerCase();
     const isSurgeryMatched = (() => {
       const s3 = step3Surgery?.trim().toLowerCase() || "";
       const s4 = step4Surgery?.trim().toLowerCase() || "";
-    
+
       if (!s3 && !s4) return false; // both empty → false
       if (!s3 || !s4) return true;  // only one filled → true
-    
+
       return s3 === s4; // both filled → must match
     })();
-    
+
 
     return {
       step4Name,
@@ -355,9 +355,9 @@ const Result = () => {
     }
     const formData = new FormData();
     formData.append("file", file);
-  
+
     const token = localStorage.getItem("access_token");
-  
+
     setErrors((prev) => ({ ...prev, file1: "" }));
     try {
       const response = await fetch("https://echs.aretehealth.tech/generate_claim_id_followup", {
@@ -367,7 +367,7 @@ const Result = () => {
       });
       const result = await response.json();
       if (!response.ok) throw new Error("Failed to get Repeat Claim ID");
-  
+
       // Store old + new claim id
       setClaimId(
         result.new_claim_id
@@ -383,7 +383,7 @@ const Result = () => {
       toast.error(`Repeat Claim ID generation failed: ${error.message || "Unknown error"}`);
     }
   };
-  
+
   const handleClaimIDFollowup = async () => {
     if (data?.step3?.file) {
       setLoadingFollowUp(true);
@@ -650,11 +650,15 @@ const Result = () => {
 
   // helper function
   const isEmptyObject = (obj: Record<string, any>) => {
-    if (!obj) return true;
-    return Object.values(obj).every(
-      (value) => value === "" || value === null || value === undefined
-    );
+    if (!obj || typeof obj !== "object") return true;
+
+    return Object.values(obj).every((value) => {
+      if (Array.isArray(value)) return value.length === 0; // ✅ empty array check
+      if (value && typeof value === "object") return isEmptyObject(value); // nested object support
+      return value === "" || value === null || value === undefined;
+    });
   };
+
   useEffect(() => {
     if (comparisons.isNameMatched) {
       setApprovals((prev) => ({ ...prev, name: true }));
@@ -674,7 +678,7 @@ const Result = () => {
     <main className="min-h-screen bg-gradient-to-b from-background to-muted">
       <Navbar />
 
-      <div className="container flex flex-row justify-between items-center">
+      <div className="container flex flex-row gap-2 justify-between items-center">
         <div
           className="border rounded-sm bg-muted/50 backdrop-blur-md p-4 md:mb-6 text-center cursor-pointer hover:bg-muted/70 transition-colors"
           onClick={() => {
@@ -1035,11 +1039,11 @@ const Result = () => {
           })()}
         </div>
 
-          <div
-            className="border border-primary rounded-sm bg-muted/50 backdrop-blur-md p-4 mb-6 text-center cursor-pointer hover:bg-muted/70 transition-colors"
-          >
-            Referred To :{" "} {data?.step3?.referredTo}
-          </div>
+        <div
+          className="border border-primary rounded-sm bg-muted/50 backdrop-blur-md p-4 mb-6 text-center cursor-pointer hover:bg-muted/70 transition-colors"
+        >
+          Referred To :{" "} {data?.step3?.referredTo}
+        </div>
       </section>
 
 

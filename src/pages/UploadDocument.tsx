@@ -459,7 +459,7 @@ const UploadDocument = () => {
         registration_no: result?.data["Registration No"],
         category_of_ward: result?.data["Category of Ward"],
         dob: formatDateForInput(result?.data["DOB"]),
-        valid_upto: formatDateForInput(result?.data["Valid Upto"]),
+        valid_upto: formatDateForInputTS(result?.data["Valid Upto"]),
         oicStamp: result?.data["OIC Stamp"] === "Found",
         file: file, // Clear the file field after upload
       });
@@ -763,6 +763,17 @@ const UploadDocument = () => {
     return `${year}-${month}-${day}`;
   };
 
+  const formatDateForInputTS = (dateStr) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    if (isNaN(date)) return "";
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    console.log(day, month, year, " this is date string");
+    return `${day}-${month}-${year}`;
+  };
 
   console.log(data, " this is upload data ")
   const uploadAllDocument = async () => {

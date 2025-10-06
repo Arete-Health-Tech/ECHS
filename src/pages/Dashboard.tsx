@@ -56,6 +56,13 @@ interface UserHistoryItem {
     id?: string;
     uploaded_at?: string;
   };
+  prescription?: {
+    data?: {
+      [key: string]: any;
+    };
+    id?: string;
+    uploaded_at?: string;
+  }
 }
 
 const Dashboard = () => {
@@ -110,7 +117,7 @@ const Dashboard = () => {
 
   const getPatientName = (item: UserHistoryItem) => {
     return (
-      item?.aadhar_card?.data?.Name ||
+      // item?.aadhar_card?.data?.Name ||
       item?.echs_card_or_temporary_slip?.data?.["Patient Name"] ||
       item?.referral_letter?.data?.["Claim ID"] ||
       "Unknown Patient"
@@ -293,8 +300,8 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="md:hidden">
-                        {getStatusBadge(item.matched)}
-                      </div>
+                      {getStatusBadge(item.matched)}
+                    </div>
                   </CardHeader>
 
                   <CardContent className="pt-0">
@@ -324,9 +331,10 @@ const Dashboard = () => {
                         </span>
                         <span className="font-medium">
                           {[
-                            item.aadhar_card && "Aadhaar",
+                            // item.aadhar_card && "Aadhaar",
                             item.echs_card_or_temporary_slip && "ECHS",
                             item.referral_letter && "Referral",
+                            item.prescription && "Prescription",
                           ]
                             .filter(Boolean)
                             .join(", ")}

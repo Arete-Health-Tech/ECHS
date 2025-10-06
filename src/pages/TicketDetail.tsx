@@ -314,7 +314,7 @@ const TicketDetail = () => {
                     <p className="font-medium">
                       {
                         [
-                          ticket.aadhar_card && "Aadhaar",
+                          // ticket.aadhar_card && "Aadhaar",
                           ticket.echs_card_or_temporary_slip && "ECHS",
                           ticket.referral_letter && "Referral",
                           ticket.prescription && "Prescription",
@@ -331,7 +331,7 @@ const TicketDetail = () => {
           {/* Document Details */}
           <div className="md:container mx-auto md:p-6 px-2 space-y-6 ">
             {/* Aadhaar Card */}
-            {ticket.aadhar_card?.data && (
+            {/* {ticket.aadhar_card?.data && (
               <Card className="border-0 shadow-sm">
                 <CardHeader className="flex justify-between items-left">
                   <CardTitle className="flex items-center gap-3 text-lg">
@@ -370,7 +370,7 @@ const TicketDetail = () => {
                   </CardContent>
                 )}
               </Card>
-            )}
+            )} */}
 
             {/* ECHS Card */}
             {ticket.echs_card_or_temporary_slip?.data && (
