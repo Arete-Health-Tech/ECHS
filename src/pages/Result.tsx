@@ -161,7 +161,7 @@ const Result = () => {
     //   data.step1?.category || data.step1Temporary?.category || "";
     const step2Gender = data.step2?.gender || "";
     const step3Gender = data.step3?.gender || "";
-    const step4Gender = data.step4.gender || "";
+    const step4Gender = data.step4?.gender || "";
 
     // const step1Age = data.step1?.dob
     //   ? calculateAge(data.step1.dob)
@@ -183,7 +183,7 @@ const Result = () => {
     const step4Surgery = data.step4.advice || "";
 
     const isNameMatched = (() => {
-      const names = [step1Name, step3Name]
+      const names = [step1Name, step3Name, step4Name]
         .filter((n) => n !== undefined && n !== null && n.trim() !== "")
         .map((n) => n.trim().toLowerCase());
 
@@ -228,7 +228,7 @@ const Result = () => {
     //   // Math.floor(Number(step1Age)) === Math.floor(Number(step2Age)) &&
     //   Math.floor(Number(step1Age)) === Math.floor(Number(step3Age));
     const isAgeMatched = (() => {
-      const ages = [step1Age, step3Age, step4Age].filter(
+      const ages = [step3Age, step4Age].filter(
         (a) => a !== undefined && a !== null && String(a).trim() !== ""
       );
 
@@ -925,7 +925,7 @@ const Result = () => {
                       {comparisons.step4Gender}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      {data.step3.gender ? (
+                      {comparisons.isGenderMatched ? (
                         <Check className="text-green-600 inline" />
                       ) : (
                         <X className="text-red-600 inline" />
@@ -947,7 +947,7 @@ const Result = () => {
                       Age
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
-                      {comparisons.step1Age ?? "-"}
+                      {"-"}
                     </td>
                     <td className="p-2 border text-[10px] md:text-[14px]">
                       {comparisons.step2Age ?? "-"}
