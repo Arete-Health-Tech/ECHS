@@ -163,11 +163,15 @@ const Result = () => {
     const step3Gender = data.step3?.gender || "";
     const step4Gender = data.step4.gender || "";
 
-    const step1Age = data.step1?.dob
-      ? calculateAge(data.step1.dob)
-      : data.step1Temporary?.date
-        ? calculateAge(data.step1Temporary.date)
-        : undefined;
+    // const step1Age = data.step1?.dob
+    //   ? calculateAge(data.step1.dob)
+    //   : data.step1Temporary?.date
+    //     ? calculateAge(data.step1Temporary.date)
+    //     : undefined;
+
+    const step1Age = data.step1Temporary?.dob
+      ? calculateAge(data.step1Temporary.dob)
+      : undefined;
 
     const step2Age = data.step2?.dob ? calculateAge(data.step2.dob) : undefined;
     const step3Age = data.step3?.age ? Number(data.step3.age) : undefined;
@@ -224,7 +228,7 @@ const Result = () => {
     //   // Math.floor(Number(step1Age)) === Math.floor(Number(step2Age)) &&
     //   Math.floor(Number(step1Age)) === Math.floor(Number(step3Age));
     const isAgeMatched = (() => {
-      const ages = [step1Age, step3Age].filter(
+      const ages = [step1Age, step3Age, step4Age].filter(
         (a) => a !== undefined && a !== null && String(a).trim() !== ""
       );
 
