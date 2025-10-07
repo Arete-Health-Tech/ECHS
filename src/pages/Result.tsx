@@ -190,7 +190,7 @@ const Result = () => {
       if (names.length === 0) return false; // both empty
       if (names.length === 1) return true;  // only one filled → nothing to compare
 
-      return names[0] === names[1]; // both filled → must match
+      return names.every((n) => n === names[0]);
     })();
 
 
@@ -235,7 +235,7 @@ const Result = () => {
       if (ages.length === 0) return false; // both empty
       if (ages.length === 1) return true;  // only one filled → nothing to compare
 
-      return Math.floor(Number(step1Age)) === Math.floor(Number(step3Age));
+      return Math.floor(Number(step4Age)) === Math.floor(Number(step3Age));
     })();
 
 
@@ -664,10 +664,10 @@ const Result = () => {
   };
 
   useEffect(() => {
-    if (comparisons.isNameMatched) {
+    if (comparisons.isNameMatched === true) {
       setApprovals((prev) => ({ ...prev, name: true }));
     }
-    if (comparisons.isAgeMatched) {
+    if (comparisons.isAgeMatched === true) {
       setApprovals((prev) => ({ ...prev, age: true }));
     }
     if (comparisons.isGenderMatched === true) {
