@@ -288,12 +288,12 @@ const Navbar: React.FC = () => {
 
         {/* Desktop Menu */}
         <nav className="hidden md:flex items-center gap-4">
-          <Button variant="ghost" onClick={fetchAndOpenCSV}>
+          {/* <Button variant="ghost" onClick={fetchAndOpenCSV}>
             Download
             <DownloadCloudIcon
               className="cursor-pointer"
             />
-          </Button>
+          </Button> */}
           <Button variant="ghost" onClick={handleUploadDocs}>
             Upload Docs
           </Button>
@@ -347,12 +347,12 @@ const Navbar: React.FC = () => {
       {isOpen && (
         <div className="md:hidden bg-white border-t shadow-md">
           <nav className="flex flex-col p-4 gap-2">
-          <Button variant="ghost" onClick={fetchAndOpenCSV}>
+          {/* <Button variant="ghost" onClick={fetchAndOpenCSV}>
             Download
             <DownloadCloudIcon
               className="cursor-pointer"
             />
-          </Button>
+          </Button> */}
             <Button variant="ghost" onClick={() => navigate("/form")}>
               Upload Docs
             </Button>
