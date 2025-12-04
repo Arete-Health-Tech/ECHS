@@ -621,6 +621,8 @@ const UploadDocument = () => {
     try {
       const response = await fetch(
         "https://echs.aretehealth.tech/extract/referral_letter",
+     
+
         {
           method: "POST",
           body: formData,
@@ -714,6 +716,7 @@ const UploadDocument = () => {
     try {
       const response = await fetch(
         "https://echs.aretehealth.tech/extract/prescription",
+        
         {
           method: "POST",
           body: formData,
@@ -762,16 +765,20 @@ const UploadDocument = () => {
     console.log(year, month, day, " this is date string");
     return `${year}-${month}-${day}`;
   };
-
-  const formatDateForInputTS = (dateStr) => {
+  const formatDateForInputTS = (dateStr: string) => {
     if (!dateStr) return "";
+  
     const date = new Date(dateStr);
-    if (isNaN(date)) return "";
-
+  
+    // Fix: use getTime() to check validity
+    if (isNaN(date.getTime())) return "";
+  
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
+  
     console.log(day, month, year, " this is date string");
+  
     return `${day}-${month}-${year}`;
   };
 

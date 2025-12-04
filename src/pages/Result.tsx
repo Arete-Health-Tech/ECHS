@@ -677,7 +677,21 @@ const Result = () => {
       setApprovals((prev) => ({ ...prev, surgery: true }));
     }
   }, [comparisons]);
-
+  const validity = data.step3?.validityUpto;
+  console.log(validity,"validity")
+  const isValidityOk = () => {
+    if (!validity) return false; // in case it's null/undefined
+  
+    const [day, month, year] = validity.split("-");
+    const validityDate = new Date(`${year}-${month}-${day}`); // convert to YYYY-MM-DD
+    const today = new Date();
+  
+    // remove time part for proper comparison
+    validityDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+  
+    return validityDate >= today;
+  };
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-muted">
       <Navbar />
@@ -760,16 +774,16 @@ const Result = () => {
           New Submission
         </div>
         <div className="flex flex-col md:flex-row gap-2">
-          <Button
-            onClick={handleClaimIDFollowup}
-            disabled={loadingFollowUp || !allApproved}
-            className={`gap-2 transition-colors ${loadingFollowUp
-              ? "bg-primary text-white hover:bg-primary/90"
-              : allApproved
-                ? "bg-green-600 text-white border border-green-600 hover:bg-green-700"
-                : "bg-gray-300 text-gray-600 cursor-not-allowed"
-              }`}
-          >
+        <Button
+  onClick={handleClaimID}
+  disabled={loading || !allApproved || !isValidityOk()}
+  className={`gap-2 transition-colors ${loading
+    ? "bg-primary text-white hover:bg-primary/90"
+    : allApproved && isValidityOk()
+      ? "bg-green-600 text-white border border-green-600 hover:bg-green-700"
+      : "bg-gray-300 text-gray-600 cursor-not-allowed"
+    }`}
+>
             {loadingFollowUp ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -780,15 +794,15 @@ const Result = () => {
             )}
           </Button>
           <Button
-            onClick={handleClaimID}
-            disabled={loading || !allApproved}
-            className={`gap-2 transition-colors ${loading
-              ? "bg-primary text-white hover:bg-primary/90"
-              : allApproved
-                ? "bg-green-600 text-white border border-green-600 hover:bg-green-700"
-                : "bg-gray-300 text-gray-600 cursor-not-allowed"
-              }`}
-          >
+  onClick={handleClaimID}
+  disabled={loading || !allApproved || !isValidityOk()}
+  className={`gap-2 transition-colors ${loading
+    ? "bg-primary text-white hover:bg-primary/90"
+    : allApproved && isValidityOk()
+      ? "bg-green-600 text-white border border-green-600 hover:bg-green-700"
+      : "bg-gray-300 text-gray-600 cursor-not-allowed"
+    }`}
+>
             {loading ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
