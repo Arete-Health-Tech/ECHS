@@ -775,7 +775,7 @@ const Result = () => {
         </div>
         <div className="flex flex-col md:flex-row gap-2">
         <Button
-  onClick={handleClaimID}
+  onClick={handleClaimIDFollowup}
   disabled={loading || !allApproved || !isValidityOk()}
   className={`gap-2 transition-colors ${loading
     ? "bg-primary text-white hover:bg-primary/90"
